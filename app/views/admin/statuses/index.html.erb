@@ -1,0 +1,40 @@
+<div class="container fade-in" style="max-width: 700px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">ステータス一覧</h2>
+
+  <!-- ステータス追加フォーム -->
+  <div class="mb-4">
+    <%= form_with model: @status, url: admin_statuses_path, local: true do |f| %>
+      <div class="mb-2">
+        <%= f.label :name, "ステータス名", class: "form-label" %>
+        <%= f.text_field :name, class: "form-control" %>
+      </div>
+      <%= f.submit "追加", class: "btn btn-primary px-4" %>
+    <% end %>
+  </div>
+
+  <!-- ステータス一覧テーブル -->
+  <table class="table table-striped align-middle shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>ステータス名</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @statuses.each do |status| %>
+        <tr>
+          <td><%= status.id %></td>
+          <td><%= status.name %></td>
+          <td>
+            <%= link_to "編集", edit_admin_status_path(status), class: "btn btn-sm btn-outline-primary me-1" %>
+            <%= link_to "削除", admin_status_path(status),
+                        method: :delete,
+                        data: { confirm: "削除しますか？" },
+                        class: "btn btn-sm btn-danger" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,15 @@
+<div class="container fade-in" style="max-width: 500px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">ステータス編集</h2>
+
+  <%= form_with model: @status, url: admin_status_path(@status), method: :patch, local: true do |f| %>
+    <div class="mb-2">
+      <%= f.label :name, "ステータス名", class: "form-label" %>
+      <%= f.text_field :name, class: "form-control" %>
+    </div>
+    <%= f.submit "更新", class: "btn btn-primary px-4" %>
+  <% end %>
+
+  <div class="mt-4 text-center">
+    <%= link_to "戻る", admin_statuses_path, class: "btn btn-secondary px-4" %>
+  </div>
+</div>

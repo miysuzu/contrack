@@ -1,0 +1,13 @@
+<main class="container fade-in" style="max-width: 700px; margin: 40px auto; padding: 0 20px;">
+  <div class="text-center my-5">
+    <h1 class="display-4 fw-bold mb-4" style="color: #009fe8; background: #e0f7fa; border-radius: 8px; padding: 18px 0; letter-spacing: 0.05em;">ようこそ、Contrackへ</h1>
+    <% if user_signed_in? %>
+    <% else %>
+      <p class="fs-5 mt-4" style="color:#333;">契約書を整理・共有・期限管理できる実務向けのアプリです。</p>
+      <div class="mt-5 d-flex justify-content-center gap-3">
+        <%= link_to "新規登録", new_user_registration_path, class: "btn btn-primary btn-lg px-5 shadow-sm" %>
+        <%= link_to "ログイン", new_user_session_path, class: "btn btn-outline-primary btn-lg px-5 shadow-sm" %>
+      </div>
+    <% end %>
+  </div>
+</main>

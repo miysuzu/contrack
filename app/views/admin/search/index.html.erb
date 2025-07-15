@@ -1,0 +1,122 @@
+<div class="container fade-in" style="max-width: 900px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">
+    検索結果
+    <% if @keyword.present? %>
+      <small class="d-block mt-2 fs-6 fw-normal">「<%= @keyword %>」の検索結果</small>
+    <% end %>
+  </h2>
+
+  <% if @search_type == "users" %>
+    <!-- ユーザー検索結果 -->
+    <div class="mb-3">
+      <span class="badge bg-primary fs-6">ユーザー検索結果</span>
+      <span class="ms-2 text-muted">（<%= @users.count %>件）</span>
+    </div>
+
+    <% if @users.any? %>
+      <table class="table table-striped align-middle shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>氏名</th>
+            <th>メールアドレス</th>
+            <th>ステータス</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td><%= user.id %></td>
+              <td><%= user.name %></td>
+              <td><%= user.email %></td>
+              <td>
+                <% if user.is_active %>
+                  <span class="badge bg-success">有効</span>
+                <% else %>
+                  <span class="badge bg-secondary text-dark">退会</span>
+                <% end %>
+              </td>
+              <td>
+                <%= link_to '詳細', admin_user_path(user), class: "btn btn-sm btn-outline-primary me-1" %>
+                <%= link_to '編集', edit_admin_user_path(user), class: "btn btn-sm btn-outline-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="alert alert-info text-center">
+        <i class="fas fa-search me-2"></i>
+        該当するユーザーが見つかりませんでした。
+      </div>
+    <% end %>
+
+  <% else %>
+    <!-- 契約書検索結果 -->
+    <div class="mb-3">
+      <span class="badge bg-success fs-6">契約書検索結果</span>
+      <span class="ms-2 text-muted">（<%= @contracts.count %>件）</span>
+    </div>
+
+    <% if @contracts.any? %>
+      <table class="table table-striped align-middle shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th>タイトル</th>
+            <th>作成者</th>
+            <th>ステータス</th>
+            <th>タグ</th>
+            <th>作成日</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @contracts.each do |contract| %>
+            <tr>
+              <td><%= link_to contract.title, admin_contract_path(contract), class: "fw-bold text-decoration-none" %></td>
+              <td><%= contract.user.name %></td>
+              <td>
+                <% case contract.status.name
+                   when "下書き" %>
+                  <span class="badge bg-light text-dark"><%= contract.status.name %></span>
+                <% when "送信済" %>
+                  <span class="badge bg-warning text-dark"><%= contract.status.name %></span>
+                <% when "締結済" %>
+                  <span class="badge bg-success"><%= contract.status.name %></span>
+                <% else %>
+                  <span class="badge bg-secondary text-dark"><%= contract.status.name %></span>
+                <% end %>
+              </td>
+              <td>
+                <% contract.tags.each do |tag| %>
+                  <span class="badge bg-info text-dark me-1"><%= tag.name %></span>
+                <% end %>
+              </td>
+              <td><%= contract.created_at.strftime("%Y/%m/%d") %></td>
+              <td>
+                <%= link_to '詳細', admin_contract_path(contract), class: "btn btn-sm btn-outline-primary me-1" %>
+                <%= link_to '削除', admin_contract_path(contract), method: :delete, 
+                    data: { confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="alert alert-info text-center">
+        <i class="fas fa-search me-2"></i>
+        該当する契約書が見つかりませんでした。
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="mt-4 text-center">
+    <%= link_to "新しい検索", admin_search_path, class: "btn btn-outline-primary me-2" %>
+    <% if @search_type == "users" %>
+      <%= link_to "ユーザー一覧に戻る", admin_users_path, class: "btn btn-outline-secondary" %>
+    <% else %>
+      <%= link_to "契約書一覧に戻る", admin_contracts_path, class: "btn btn-outline-secondary" %>
+    <% end %>
+  </div>
+</div> 

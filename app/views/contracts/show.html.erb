@@ -1,0 +1,24 @@
+<div class="container fade-in" style="max-width: 700px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">
+    <%= @contract.title %>
+  </h2>
+
+  <div class="mb-5 px-3">
+    <p class="fs-5" style="white-space: pre-line;"><%= simple_format(@contract.body) %></p>
+    
+    <!-- タグ表示 -->
+    <% if @contract.tags.any? %>
+      <div class="mt-4">
+        <strong>タグ：</strong>
+        <% @contract.tags.each do |tag| %>
+          <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-1" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4 d-flex gap-3 justify-content-center">
+    <%= link_to "編集", edit_contract_path(@contract), class: "btn btn-warning px-4" %>
+    <%= link_to "一覧に戻る", contracts_path, class: "btn btn-secondary px-4" %>
+  </div>
+</div>

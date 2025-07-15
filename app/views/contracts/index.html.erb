@@ -1,0 +1,67 @@
+<div class="container fade-in" style="max-width: 900px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">契約書一覧</h2>
+
+  <div class="mb-4 text-end">
+    <%= link_to "新規作成", new_contract_path, class: "btn btn-primary px-4" %>
+  </div>
+
+  <!-- タグ絞り込みリンク -->
+  <div class="mb-3">
+    <span class="me-2">タグで絞り込む：</span>
+    <% ActsAsTaggableOn::Tag.all.each do |tag| %>
+      <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge rounded-pill bg-info text-dark me-1 px-3 py-2" %>
+    <% end %>
+  </div>
+
+  <!-- ステータス絞り込みフォーム -->
+  <%= form_with url: contracts_path, method: :get, local: true, class: "mb-4 row g-2 align-items-center" do %>
+    <div class="col-auto">
+      <%= select_tag :status_id, options_from_collection_for_select(Status.all, :id, :name, params[:status_id]), include_blank: "すべて", class: "form-select" %>
+    </div>
+    <div class="col-auto">
+      <%= submit_tag "絞り込む", class: "btn btn-outline-primary" %>
+    </div>
+  <% end %>
+
+  <table class="table table-striped align-middle shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>タイトル</th>
+        <th>ステータス</th>
+        <th>タグ</th>
+        <th>作成日</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @contracts.each do |contract| %>
+        <tr>
+          <td><%= link_to contract.title, contract_path(contract), class: "fw-bold text-decoration-none" %></td>
+          <td>
+            <% case contract.status.name
+               when "下書き" %>
+              <span class="badge bg-light text-dark"><%= contract.status.name %></span>
+            <% when "送信済" %>
+              <span class="badge bg-warning text-dark"><%= contract.status.name %></span>
+            <% when "締結済" %>
+              <span class="badge bg-success"><%= contract.status.name %></span>
+            <% else %>
+              <span class="badge bg-secondary text-dark"><%= contract.status.name %></span>
+            <% end %>
+          </td>
+          <td>
+            <% contract.tags.each do |tag| %>
+              <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-1" %>
+            <% end %>
+          </td>
+          <td><%= l(contract.created_at, format: :short) %></td>
+          <td>
+            <%= link_to "詳細", contract_path(contract), class: "btn btn-sm btn-outline-primary me-1" %>
+            <%= link_to "編集", edit_contract_path(contract), class: "btn btn-sm btn-outline-warning me-1" %>
+            <%= link_to "削除", contract_path(contract), method: :delete, data: { confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

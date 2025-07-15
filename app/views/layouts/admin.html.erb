@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contrack 管理画面</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <!-- 管理者ヘッダー -->
+    <header class="bg-light border-bottom">
+      <div class="container d-flex justify-content-between align-items-center py-2" style="max-width: 1000px;">
+        <h1 class="h5 mb-0">
+          <% if admin_signed_in? %>
+            <%= link_to "Contrack管理画面", admin_contracts_path, class: "text-dark text-decoration-none fw-bold" %>
+          <% else %>
+            <span class="text-dark fw-bold">Contrack管理画面</span>
+          <% end %>
+        </h1>
+
+        <% if admin_signed_in? %>
+          <nav>
+            <ul class="nav">
+              <li class="nav-item me-2 small text-muted d-flex align-items-center">
+                ようこそ <strong class="ms-1">管理者</strong> さん
+              </li>
+              <li class="nav-item"><%= link_to "契約一覧", admin_contracts_path, class: "nav-link px-2" %></li>
+              <li class="nav-item"><%= link_to "ステータス一覧", admin_statuses_path, class: "nav-link px-2" %></li>
+              <li class="nav-item"><%= link_to "会員一覧", admin_users_path, class: "nav-link px-2" %></li>
+              <li class="nav-item"><%= link_to "ログアウト", destroy_admin_session_path, method: :delete, class: "nav-link text-danger px-2" %></li>
+            </ul>
+          </nav>
+        <% end %>
+      </div>
+    </header>
+
+    <!-- 🔍 検索バー：ログイン時のみ表示 -->
+    <% if admin_signed_in? %>
+      <div class="bg-light border-bottom">
+        <div class="container py-2 d-flex justify-content-end" style="max-width: 1000px;">
+          <%= form_with url: admin_search_path, method: :get, local: true, class: "d-flex flex-wrap align-items-end gap-2 justify-content-end" do %>
+            <!-- 検索対象選択 -->
+            <div>
+              <%= label_tag :search_type, "検索対象", class: "form-label me-1" %>
+              <%= select_tag :search_type,
+                  options_for_select([
+                    ["ユーザー", "users"],
+                    ["契約書", "contracts"]
+                  ], params[:search_type] || "users"),
+                  class: "form-select form-select-sm d-inline w-auto" %>
+            </div>
+
+            <!-- キーワード検索 -->
+            <%= text_field_tag :keyword, params[:keyword], placeholder: "キーワードを入力", class: "form-control form-control-sm w-auto" %>
+
+            <!-- 契約書検索時の追加フィルター -->
+            <div id="contract-filters" style="display: none;">
+              <div>
+                <%= label_tag :status_id, "ステータス", class: "form-label me-1" %>
+                <%= select_tag :status_id,
+                    options_from_collection_for_select(Status.all, :id, :name, params[:status_id]),
+                    include_blank: "すべて", class: "form-select form-select-sm d-inline w-auto" %>
+              </div>
+
+              <div>
+                <%= label_tag :tag, "タグ", class: "form-label me-1" %>
+                <%= select_tag :tag,
+                    options_for_select(ActsAsTaggableOn::Tag.pluck(:name), params[:tag]),
+                    include_blank: "すべて", class: "form-select form-select-sm d-inline w-auto" %>
+              </div>
+            </div>
+
+            <%= submit_tag "検索", class: "btn btn-sm btn-outline-primary" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <script>
+      // 検索対象が変更された時の処理
+      document.addEventListener('DOMContentLoaded', function() {
+        const searchTypeSelect = document.getElementById('search_type');
+        const contractFilters = document.getElementById('contract-filters');
+        
+        function toggleFilters() {
+          if (searchTypeSelect.value === 'contracts') {
+            contractFilters.style.display = 'flex';
+          } else {
+            contractFilters.style.display = 'none';
+          }
+        }
+        
+        searchTypeSelect.addEventListener('change', toggleFilters);
+        toggleFilters(); // 初期表示
+      });
+    </script>
+
+    <!-- フラッシュメッセージ -->
+    <div class="container mt-3" style="max-width: 1000px;">
+      <% flash.each do |key, value| %>
+        <div class="alert alert-<%= key == 'notice' ? 'success' : 'danger' %>" role="alert">
+          <%= value %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- メイン -->
+    <main class="container mt-4" style="max-width: 1000px;">
+      <%= yield %>
+    </main>
+  </body>
+</html>

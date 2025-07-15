@@ -1,0 +1,36 @@
+<% if @contract.errors.any? %>
+  <div class="alert alert-danger">
+    <h4><%= @contract.errors.count %>件のエラーが発生しました</h4>
+    <ul>
+      <% @contract.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: @contract, local: true do |f| %>
+  <div class="form-group">
+    <%= f.label :title, "契約タイトル" %>
+    <%= f.text_field :title, class: "form-control" %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label :body, "契約内容" %>
+    <%= f.text_area :body, rows: 8, class: "form-control" %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label :status_id, "ステータス" %>
+    <%= f.collection_select :status_id, Status.all, :id, :name, {}, { class: "form-control" } %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label :tag_list, "タグ（カンマ区切り）" %>
+    <%= f.text_field :tag_list, value: @contract.tag_list.join(", "), class: "form-control" %>
+  </div>
+
+  <div class="mt-4">
+    <%= f.submit "保存する", class: "btn btn-success" %>
+  </div>
+<% end %>

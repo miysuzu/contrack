@@ -38,6 +38,13 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # 開発環境でのメール送信設定（コンソールに表示）
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.perform_deliveries = true
+  
+  # メール送信エラーを表示
+  config.action_mailer.raise_delivery_errors = true
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -76,4 +83,6 @@ Rails.application.configure do
 
   # 開発用ホスト許可
   config.hosts.clear
+
+  config.action_mailer.default_url_options = { host: 'localhost', port: 8080 }
 end

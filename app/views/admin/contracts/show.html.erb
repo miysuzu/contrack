@@ -1,0 +1,41 @@
+<div class="container fade-in" style="max-width: 700px;">
+  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">
+    <%= @contract.title %>
+  </h2>
+
+  <div class="mb-3 px-3">
+    <p class="mb-2"><strong>投稿ユーザー：</strong> <%= @contract.user.name %></p>
+    <p class="mb-2"><strong>ステータス：</strong>
+      <% case @contract.status.name
+         when "下書き" %>
+        <span class="badge bg-light text-dark"><%= @contract.status.name %></span>
+      <% when "送信済" %>
+        <span class="badge bg-warning text-dark"><%= @contract.status.name %></span>
+      <% when "締結済" %>
+        <span class="badge bg-success"><%= @contract.status.name %></span>
+      <% else %>
+        <span class="badge bg-secondary text-dark"><%= @contract.status.name %></span>
+      <% end %>
+    </p>
+    <p class="mb-2"><strong>タグ：</strong>
+      <% if @contract.tags.any? %>
+        <% @contract.tags.each do |tag| %>
+          <span class="badge bg-info text-dark me-1"><%= tag.name %></span>
+        <% end %>
+      <% else %>
+        <span class="text-muted">なし</span>
+      <% end %>
+    </p>
+  </div>
+
+  <hr>
+
+  <div class="mb-5 px-3">
+    <p class="mb-1"><strong>契約内容：</strong></p>
+    <p class="fs-5" style="white-space: pre-line;"><%= simple_format(@contract.body) %></p>
+  </div>
+
+  <div class="mt-4 text-center">
+    <%= link_to "一覧に戻る", admin_contracts_path, class: "btn btn-secondary px-4" %>
+  </div>
+</div>
