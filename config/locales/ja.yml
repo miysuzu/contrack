@@ -19,7 +19,7 @@ ja:
         title: "契約タイトル"
         body: "契約内容"
         description: "説明"
-        status_id: "ステータス"
+        status: "ステータス"
         tag_list: "タグ"
         user_id: "ユーザー"
         created_at: "作成日時"
@@ -103,6 +103,7 @@ ja:
     failure:
       already_authenticated: "すでにログインしています。"
       inactive: "アカウントが有効化されていません。"
+      inactive_account: "このアカウントは退会済みです。"
       invalid: "メールアドレスまたはパスワードが違います。"
       locked: "アカウントがロックされています。"
       last_attempt: "アカウントがロックされる前に、もう一度ログインを試みてください。"

@@ -4,6 +4,7 @@
   <%= render 'form' %>
 
   <div class="mt-4 text-center">
+    <%= link_to "削除", contract_path(@contract), method: :delete, data: { confirm: "本当に削除しますか？" }, class: "btn btn-danger px-4" %>
     <%= link_to "戻る", contract_path(@contract), class: "btn btn-secondary px-4" %>
   </div>
 </div>

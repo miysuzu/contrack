@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2025_07_14_202427) do
 
-  create_table "admins", charset: "utf8mb4", force: :cascade do |t|
+  create_table "admins", force: :cascade do |t|
     t.string "email", limit: 191, default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token", limit: 191
@@ -24,31 +24,29 @@ ActiveRecord::Schema.define(version: 2025_07_14_202427) do
     t.index ["reset_password_token"], name: "index_admins_on_reset_password_token", unique: true
   end
 
-  create_table "contracts", charset: "utf8mb4", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "status_id", null: false
+  create_table "contracts", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "status_id", null: false
     t.string "title"
     t.text "description"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "body"
-    t.index ["status_id"], name: "fk_rails_086b3345ee"
-    t.index ["user_id"], name: "fk_rails_f191b5ed7a"
   end
 
-  create_table "statuses", charset: "utf8mb4", force: :cascade do |t|
+  create_table "statuses", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "color"
   end
 
-  create_table "taggings", charset: "utf8mb4", force: :cascade do |t|
-    t.bigint "tag_id"
+  create_table "taggings", force: :cascade do |t|
+    t.integer "tag_id"
     t.string "taggable_type", limit: 128
-    t.bigint "taggable_id"
+    t.integer "taggable_id"
     t.string "tagger_type", limit: 128
-    t.bigint "tagger_id"
+    t.integer "tagger_id"
     t.string "context", limit: 128
     t.datetime "created_at"
     t.string "tenant", limit: 128
@@ -66,15 +64,15 @@ ActiveRecord::Schema.define(version: 2025_07_14_202427) do
     t.index ["tenant"], name: "index_taggings_on_tenant"
   end
 
-  create_table "tags", charset: "utf8mb4", force: :cascade do |t|
-    t.string "name", collation: "utf8_bin"
+  create_table "tags", force: :cascade do |t|
+    t.string "name", limit: 191
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "taggings_count", default: 0
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
-  create_table "users", charset: "utf8mb4", force: :cascade do |t|
+  create_table "users", force: :cascade do |t|
     t.string "email", limit: 191, default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token", limit: 191

@@ -58,7 +58,6 @@
           <td>
             <%= link_to "詳細", contract_path(contract), class: "btn btn-sm btn-outline-primary me-1" %>
             <%= link_to "編集", edit_contract_path(contract), class: "btn btn-sm btn-outline-warning me-1" %>
-            <%= link_to "削除", contract_path(contract), method: :delete, data: { confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger" %>
           </td>
         </tr>
       <% end %>
