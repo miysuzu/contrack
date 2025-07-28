@@ -1,5 +1,9 @@
-<p>Welcome <%= @email %>!</p>
-
-<p>You can confirm your account email through the link below:</p>
-
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<div style="font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif;">
+  <h2 style="color: #009fe8; margin-bottom: 1.5em;">メールアドレス確認のご案内</h2>
+  <p>Welcome <%= @email %> 様</p>
+  <p>下記のリンクからメールアドレスの確認を完了してください。</p>
+  <p style="margin: 2em 0;">
+    <%= link_to 'メールアドレスを確認する', confirmation_url(@resource, confirmation_token: @token), style: 'display: inline-block; background: #009fe8; color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;' %>
+  </p>
+  <p>このメールに心当たりがない場合は、このまま無視してください。</p>
+</div>

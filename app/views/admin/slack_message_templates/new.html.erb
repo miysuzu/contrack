@@ -1,0 +1,24 @@
+<!-- Heroセクション -->
+<section class="hero-section bg-dashboard">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fab fa-slack me-3"></i>新規テンプレート作成
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">Slackメッセージテンプレートを作成できます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+  
+  <%# --- 編集フォームカード --- %>
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body p-4">
+      <h3 class="text-center mb-4 text-primary fw-bold">
+        <i class="fab fa-slack me-2"></i>テンプレート設定
+      </h3>
+      
+      <%= render 'form' %>
+    </div>
+  </div>
+  
+</main> 

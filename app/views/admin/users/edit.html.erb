@@ -1,18 +1,66 @@
-<div class="container fade-in" style="max-width: 500px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">会員情報編集</h2>
-  <%= form_with model: [:admin, @user], local: true do |f| %>
-    <div class="mb-3">
-      <%= f.label :name, "氏名", class: "form-label" %>
-      <%= f.text_field :name, class: "form-control" %>
+<!-- Heroセクション -->
+<section class="hero-section bg-dashboard">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-user-edit me-3"></i>会員情報編集
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">会員の情報を編集できます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+  
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow mb-4" style="border-radius: 16px;">
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bold mb-3">
+            <i class="fas fa-user me-2"></i>会員情報
+          </h5>
+          
+          <%= form_with model: [:admin, @user], local: true do |f| %>
+            <% if @user.errors.any? %>
+              <div class="alert alert-danger rounded-3">
+                <h5 class="fw-bold"><%= pluralize(@user.errors.count, "件のエラー") %>があります:</h5>
+                <ul class="mb-0">
+                  <% @user.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+            
+            <div class="form-group mb-3">
+              <%= f.label :name, "氏名", class: "form-label fw-bold" %>
+              <%= f.text_field :name, class: "form-control rounded-3 shadow-sm", placeholder: "氏名を入力してください" %>
+            </div>
+            
+            <div class="form-group mb-3">
+              <%= f.label :email, "メールアドレス", class: "form-label fw-bold" %>
+              <%= f.email_field :email, class: "form-control rounded-3 shadow-sm", placeholder: "メールアドレスを入力してください" %>
+            </div>
+            
+            <div class="form-group mb-3">
+              <%= f.label :is_active, "ステータス", class: "form-label fw-bold" %>
+              <%= f.select :is_active, 
+                  options_for_select([
+                    ['有効', true],
+                    ['退会', false]
+                  ], @user.is_active), 
+                  {}, 
+                  class: "form-select rounded-3 shadow-sm" %>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+              <%= f.submit "更新する", class: "btn btn-primary px-4" %>
+              <%= link_to admin_users_path, class: "btn btn-secondary px-4" do %>
+                <i class="fas fa-arrow-left me-2"></i>一覧へ戻る
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-      <%= f.label :email, "メールアドレス", class: "form-label" %>
-      <%= f.email_field :email, class: "form-control" %>
-    </div>
-    <div class="mb-3">
-      <%= f.label :is_active, "ステータス", class: "form-label" %><br>
-      <%= f.select :is_active, [['有効', true], ['退会', false]], {}, class: "form-select w-auto d-inline-block" %>
-    </div>
-    <%= f.submit "更新する", class: "btn btn-primary px-4" %>
-  <% end %>
-</div>
+  </div>
+  
+</main>

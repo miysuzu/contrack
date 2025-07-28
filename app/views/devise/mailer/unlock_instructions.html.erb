@@ -1,7 +1,9 @@
-<p>Hello <%= @resource.email %>!</p>
-
-<p>Your account has been locked due to an excessive number of unsuccessful sign in attempts.</p>
-
-<p>Click the link below to unlock your account:</p>
-
-<p><%= link_to 'Unlock my account', unlock_url(@resource, unlock_token: @token) %></p>
+<div style="font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif;">
+  <h2 style="color: #009fe8; margin-bottom: 1.5em;">アカウントロック解除のご案内</h2>
+  <p><%= @resource.email %> 様</p>
+  <p>ログイン試行の失敗が続いたため、アカウントがロックされました。<br>下記のリンクからロック解除を行ってください。</p>
+  <p style="margin: 2em 0;">
+    <%= link_to 'ロック解除', unlock_url(@resource, unlock_token: @token), style: 'display: inline-block; background: #009fe8; color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;' %>
+  </p>
+  <p>このメールに心当たりがない場合は、このまま無視してください。</p>
+</div>

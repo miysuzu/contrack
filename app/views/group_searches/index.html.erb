@@ -1,0 +1,128 @@
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">グループ検索・一覧</h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">グループの検索・参加・作成ができます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+
+  <%# --- 新規作成ボタン --- %>
+  <div class="text-end mb-4">
+    <%= link_to new_group_path, class: "btn btn-primary btn-lg rounded-pill px-4 shadow" do %>
+      <i class="fas fa-plus me-2"></i>新規グループ作成
+    <% end %>
+  </div>
+
+  <%# --- 検索・フィルター --- %>
+  <div class="card rounded-4 shadow-sm mb-5 border-0 search-card">
+    <div class="card-body">
+      <%= form_with url: group_searches_path, method: :get, local: true do %>
+        <div class="row g-4 align-items-end">
+          <div class="col-lg-6">
+            <label class="form-label fw-semibold">キーワード検索</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <%= text_field_tag :keyword, params[:keyword], class: "form-control", placeholder: "グループ名で検索..." %>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="d-flex gap-2">
+              <%= submit_tag "検索", class: "btn btn-outline-primary w-50" %>
+              <%= link_to "クリア", group_searches_path, class: "btn btn-outline-secondary w-50" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# --- セクション区切り線 --- %>
+  <div class="section-divider"></div>
+
+  <%# --- グループリスト --- %>
+  <% @groups.each do |group| %>
+    <div class="card mb-4 p-3 shadow-sm fade-in rounded-4">
+      <div class="d-md-flex justify-content-between align-items-start gap-4">
+        <div class="flex-fill">
+          <h5 class="fw-bold text-primary mb-2">
+            <%= link_to group.name, group_path(group), class: "text-decoration-none text-primary" %>
+          </h5>
+
+          <div class="mb-2">
+            <span class="badge bg-light status-badge">ID: <%= group.id %></span>
+          </div>
+
+          <div class="small text-muted">
+            グループID: <%= group.id %>
+          </div>
+        </div>
+
+        <%# 操作ボタン %>
+        <div class="action-buttons mt-3 mt-md-0 d-flex gap-2">
+          <% join_request = GroupJoinRequest.find_by(user: current_user, group: group) %>
+          <% if @joined_group_ids.include?(group.id) %>
+            <span class="badge bg-success d-flex align-items-center gap-1 px-3 py-2">
+              <i class="fas fa-check-circle"></i><span>所属済み</span>
+            </span>
+            <%= link_to group_path(group), class: "btn btn-sm btn-outline-primary rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+              <i class="fas fa-eye"></i><span>詳細</span>
+            <% end %>
+            <%= link_to edit_group_path(group), class: "btn btn-sm btn-outline-warning rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+              <i class="fas fa-edit"></i><span>編集</span>
+            <% end %>
+            <%= link_to group_path(group), method: :delete, data: { confirm: '本当に削除しますか？' }, class: "btn btn-sm btn-outline-danger rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+              <i class="fas fa-trash"></i><span>削除</span>
+            <% end %>
+          <% elsif join_request&.pending? %>
+            <span class="badge bg-warning text-dark d-flex align-items-center gap-1 px-3 py-2">
+              <i class="fas fa-hourglass-half"></i><span>申請中</span>
+            </span>
+            <button class="btn btn-secondary btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" disabled>
+              <i class="fas fa-clock"></i><span>申請中</span>
+            </button>
+          <% elsif join_request&.approved? %>
+            <% if @joined_group_ids.include?(group.id) %>
+              <span class="badge bg-info text-dark d-flex align-items-center gap-1 px-3 py-2">
+                <i class="fas fa-user-check"></i><span>承認済み</span>
+              </span>
+              <button class="btn btn-outline-info btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" disabled>
+                <i class="fas fa-check"></i><span>承認済み</span>
+              </button>
+            <% else %>
+              <%= form_with url: group_join_requests_path, method: :post, local: true, class: 'd-inline' do %>
+                <%= hidden_field_tag :group_id, group.id %>
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2">
+                  <i class="fas fa-user-plus"></i><span>参加申請</span>
+                </button>
+              <% end %>
+            <% end %>
+          <% elsif join_request&.rejected? %>
+            <span class="badge bg-danger d-flex align-items-center gap-1 px-3 py-2">
+              <i class="fas fa-times-circle"></i><span>拒否されました</span>
+            </span>
+            <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" disabled>
+              <i class="fas fa-ban"></i><span>申請不可</span>
+            </button>
+          <% else %>
+            <%= form_with url: group_join_requests_path, method: :post, local: true, class: 'd-inline' do %>
+              <%= hidden_field_tag :group_id, group.id %>
+              <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2">
+                <i class="fas fa-user-plus"></i><span>参加申請</span>
+              </button>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @groups.empty? %>
+    <div class="text-center py-5">
+      <i class="fas fa-users fa-4x text-muted mb-3"></i>
+      <p class="text-muted mt-3">グループがまだ登録されていません。</p>
+      <%= link_to "最初のグループを作成", new_group_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+</main>

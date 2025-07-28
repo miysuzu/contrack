@@ -1,0 +1,59 @@
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">グループ一覧</h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">所属グループの管理・編集ができます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="min-height: calc(100vh - 900px);">
+
+  <%# --- 新規作成ボタン --- %>
+  <div class="text-end mb-4">
+    <%= link_to new_group_path, class: "btn btn-primary btn-lg rounded-pill px-4 shadow" do %>
+      <i class="fas fa-plus me-2"></i>新規グループ作成
+    <% end %>
+  </div>
+
+  <%# --- セクション区切り線 --- %>
+  <div class="section-divider"></div>
+
+  <%# --- グループリスト --- %>
+  <% @groups.each do |group| %>
+    <div class="card mb-4 p-3 shadow-sm fade-in rounded-4">
+      <div class="d-md-flex justify-content-between align-items-start gap-4">
+        <div class="flex-fill">
+          <h5 class="fw-bold text-primary mb-2">
+            <%= link_to group.name, group_path(group), class: "text-decoration-none text-primary" %>
+          </h5>
+
+          <div class="mb-2">
+            <span class="badge bg-light status-badge">ID: <%= group.id %></span>
+          </div>
+
+          <div class="small text-muted">
+            グループID: <%= group.id %>
+          </div>
+        </div>
+
+        <%# 操作ボタン %>
+        <div class="action-buttons mt-3 mt-md-0 d-flex gap-2">
+          <%= link_to edit_group_path(group), class: "btn btn-sm btn-outline-warning rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+            <i class="fas fa-edit"></i><span>編集</span>
+          <% end %>
+          <%= link_to group_path(group), method: :delete, data: { confirm: '本当に削除しますか？' }, class: "btn btn-sm btn-outline-danger rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+            <i class="fas fa-trash"></i><span>削除</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @groups.empty? %>
+    <div class="text-center py-5">
+      <%= image_tag 'empty_groups.png', alt: 'グループがありません', class: 'img-fluid', style: 'max-width: 220px;' %>
+      <p class="text-muted mt-3">グループがまだ登録されていません。</p>
+      <%= link_to "最初のグループを作成", new_group_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+</main>

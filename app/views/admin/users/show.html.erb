@@ -1,38 +1,141 @@
-<div class="container fade-in" style="max-width: 700px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">会員詳細</h2>
-  <div class="mb-4 px-3">
-    <p class="mb-2"><strong>氏名：</strong><%= @user.name %></p>
-    <p class="mb-2"><strong>メール：</strong><%= @user.email %></p>
-    <p class="mb-2"><strong>ステータス：</strong>
-      <% if @user.is_active %>
-        <span class="badge bg-success">有効</span>
-      <% else %>
-        <span class="badge bg-secondary text-dark">退会</span>
-      <% end %>
-    </p>
-    <div class="mt-3">
-      <%= link_to '編集', edit_admin_user_path(@user), class: "btn btn-outline-primary" %>
+<!-- Heroセクション -->
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url('<%= asset_path('background_wave.png') %>') center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h1 class="display-4 fw-bold" style="text-shadow: 0 2px 8px #0008;">会員詳細</h1>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">会員の詳細情報を確認できます</p>
+  </div>
+</section>
+
+<!-- タイトルセクション -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 32px auto 0 auto; padding-left: 24px; padding-right: 24px;">
+  <div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary mb-3"><%= @user.name %></h2>
+  </div>
+</div>
+
+<!-- コンテンツ本体 -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <%# --- 会員情報カード --- %>
+      <div class="card mb-4 shadow-sm rounded-4 border-0">
+        <div class="card-header bg-light border-0">
+          <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-info-circle me-2"></i>会員情報
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-hashtag me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">ID</strong><br>
+                  <span class="text-muted"><%= @user.id %></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-user me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">氏名</strong><br>
+                  <span class="text-muted"><%= @user.name %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-envelope me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">メールアドレス</strong><br>
+                  <span class="text-muted"><%= @user.email %></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-building me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">所属会社</strong><br>
+                  <span class="text-muted"><%= @user.company&.name || '未設定' %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-4">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-toggle-on me-3 text-primary fa-lg"></i>
+              <div>
+                <strong class="text-dark">ステータス</strong><br>
+                <% if @user.is_active %>
+                  <span class="badge bg-success">有効</span>
+                <% else %>
+                  <span class="badge bg-secondary">退会</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# --- 契約書一覧カード --- %>
+      <div class="card mb-4 shadow-sm rounded-4 border-0">
+        <div class="card-header bg-light border-0">
+          <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-file-contract me-2"></i>契約書一覧
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <% if @contracts.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="px-4">タイトル</th>
+                    <th>ステータス</th>
+                    <th>登録日</th>
+                    <th class="text-end px-4">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @contracts.each do |contract| %>
+                    <tr>
+                      <td class="px-4"><%= contract.title %></td>
+                      <td><%= contract.status.name %></td>
+                      <td><%= l(contract.created_at, format: :short) %></td>
+                      <td class="text-end px-4">
+                        <%= link_to admin_contract_path(contract), class: "btn btn-sm btn-outline-primary" do %>
+                          <i class="fas fa-eye me-1"></i>詳細
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="p-4 text-center text-muted">
+              <i class="fas fa-file-contract fa-2x mb-2" style="opacity: 0.3;"></i>
+              <p class="mb-0">契約書がありません</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# --- アクションボタン --- %>
+      <div class="d-flex gap-3 justify-content-center my-5">
+        <%= link_to edit_admin_user_path(@user), class: "btn btn-warning px-4 rounded-pill shadow-sm" do %>
+          <i class="fas fa-edit me-2"></i>編集
+        <% end %>
+        <%= link_to admin_users_path, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+          <i class="fas fa-arrow-left me-2"></i>一覧へ戻る
+        <% end %>
+      </div>
     </div>
   </div>
-  <h3 class="mt-4 mb-3">投稿一覧</h3>
-  <table class="table table-striped align-middle shadow-sm">
-    <thead class="table-light">
-      <tr>
-        <th>タイトル</th>
-        <th>ステータス</th>
-        <th>登録日</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @contracts.each do |contract| %>
-        <tr>
-          <td><%= contract.title %></td>
-          <td><%= contract.status.name %></td>
-          <td><%= l(contract.created_at, format: :short) %></td>
-          <td><%= link_to '詳細', admin_contract_path(contract), class: "btn btn-sm btn-outline-primary" %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+
 </div>

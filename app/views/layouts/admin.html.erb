@@ -1,116 +1,365 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Contrack 管理画面</title>
+    <title>Contrack Admin</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "header", "data-turbo-track": "reload" %>
+    <%= javascript_pack_tag 'application', 'data-turbo-track': 'reload' %>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </head>
 
-  <body>
-    <!-- 管理者ヘッダー -->
-    <header class="bg-light border-bottom">
-      <div class="container d-flex justify-content-between align-items-center py-2" style="max-width: 1000px;">
-        <h1 class="h5 mb-0">
-          <% if admin_signed_in? %>
-            <%= link_to "Contrack管理画面", admin_contracts_path, class: "text-dark text-decoration-none fw-bold" %>
-          <% else %>
-            <span class="text-dark fw-bold">Contrack管理画面</span>
+  <body style="background-color: #f0f0f0;">
+    <!-- ヘッダー -->
+    <div class="header-outer">
+      <div class="custom-header">
+        <div class="header-inner">
+          <%= link_to admin_contracts_path, class: "d-flex align-items-center text-decoration-none" do %>
+            <%= image_tag 'logo.png', alt: 'Contrack Admin', style: 'height: 50px; width: auto; margin-right: 12px;' %>
+            <span class="badge bg-danger ms-2">Admin</span>
           <% end %>
-        </h1>
+          
+          <div class="d-flex align-items-center">
+            <% if admin_signed_in? %>
+              <!-- 検索窓（ユーザー・契約書切り替え可能） -->
+              <div class="search-container" style="max-width: 400px; margin-right: 15px;">
+                <%= form_with url: admin_search_path, method: :get, local: true, class: "d-flex align-items-center" do %>
+                  <div class="input-group">
+                    <%= select_tag :search_type,
+                        options_for_select([
+                          ["ユーザー", "users"],
+                          ["契約書", "contracts"]
+                        ], params[:search_type] || "users"),
+                        class: "form-select form-select-sm",
+                        style: "border-radius: 20px 0 0 20px; border: 1px solid #e0e0e0; max-width: 100px;" %>
+                    <%= text_field_tag :keyword, params[:keyword], 
+                        placeholder: "キーワードを入力", 
+                        class: "form-control form-control-sm",
+                        style: "border-radius: 0; border: 1px solid #e0e0e0;" %>
+                    <button type="submit" class="btn btn-outline-primary btn-sm" style="border-radius: 0 20px 20px 0; padding: 0.375rem 0.75rem;">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- 通知ボタン -->
+              <div class="notification-container" style="margin-right: 15px;">
+                <button class="btn btn-outline-warning btn-sm position-relative" style="border-radius: 20px; padding: 0.375rem 0.75rem;" onclick="toggleNotifications()">
+                  <i class="fas fa-bell"></i>
+                  <% if @notification_count && @notification_count > 0 %>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                      <%= @notification_count > 99 ? '99+' : @notification_count %>
+                    </span>
+                  <% end %>
+                </button>
+              </div>
 
-        <% if admin_signed_in? %>
-          <nav>
-            <ul class="nav">
-              <li class="nav-item me-2 small text-muted d-flex align-items-center">
-                ようこそ <strong class="ms-1">管理者</strong> さん
-              </li>
-              <li class="nav-item"><%= link_to "契約一覧", admin_contracts_path, class: "nav-link px-2" %></li>
-              <li class="nav-item"><%= link_to "ステータス一覧", admin_statuses_path, class: "nav-link px-2" %></li>
-              <li class="nav-item"><%= link_to "会員一覧", admin_users_path, class: "nav-link px-2" %></li>
-              <li class="nav-item"><%= link_to "ログアウト", destroy_admin_session_path, method: :delete, class: "nav-link text-danger px-2" %></li>
-            </ul>
-          </nav>
-        <% end %>
+              <!-- 管理メニューボタン -->
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" style="border-radius: 20px; padding: 0.375rem 0.75rem;" type="button" id="adminMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user-shield me-1"></i>管理メニュー
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminMenuDropdown">
+                  <li>
+                    <%= link_to admin_contracts_path, class: "dropdown-item" do %>
+                      <i class="fas fa-file-contract me-2"></i>契約一覧
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to admin_tags_path, class: "dropdown-item" do %>
+                      <i class="fas fa-tags me-2"></i>タグ管理
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to admin_statuses_path, class: "dropdown-item" do %>
+                      <i class="fas fa-list me-2"></i>ステータス一覧
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to admin_users_path, class: "dropdown-item" do %>
+                      <i class="fas fa-users me-2"></i>会員一覧
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to admin_groups_path, class: "dropdown-item" do %>
+                      <i class="fas fa-layer-group me-2"></i>グループ管理
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to admin_slack_message_templates_path, class: "dropdown-item" do %>
+                      <i class="fas fa-comment-dots me-2"></i>Slackテンプレート
+                    <% end %>
+                  </li>
+                  <% if admin_signed_in? %>
+                    <li>
+                      <%= link_to invite_admin_employees_path, class: "dropdown-item" do %>
+                        <i class="fas fa-user-plus me-2"></i>従業員招待
+                      <% end %>
+                    </li>
+                  <% end %>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <%= link_to admin_mypage_path, class: "dropdown-item" do %>
+                      <i class="fas fa-user-shield me-2"></i>マイページ
+                    <% end %>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <%= link_to destroy_admin_session_path, method: :delete, class: "dropdown-item text-danger" do %>
+                      <i class="fas fa-sign-out-alt me-2"></i>ログアウト
+                    <% end %>
+                  </li>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <!-- 🔍 検索バー：ログイン時のみ表示 -->
+    <!-- 通知ドロップダウン -->
     <% if admin_signed_in? %>
-      <div class="bg-light border-bottom">
-        <div class="container py-2 d-flex justify-content-end" style="max-width: 1000px;">
-          <%= form_with url: admin_search_path, method: :get, local: true, class: "d-flex flex-wrap align-items-end gap-2 justify-content-end" do %>
-            <!-- 検索対象選択 -->
-            <div>
-              <%= label_tag :search_type, "検索対象", class: "form-label me-1" %>
-              <%= select_tag :search_type,
-                  options_for_select([
-                    ["ユーザー", "users"],
-                    ["契約書", "contracts"]
-                  ], params[:search_type] || "users"),
-                  class: "form-select form-select-sm d-inline w-auto" %>
+      <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+        <div class="notification-header">
+          <h6 class="mb-0 fw-bold">通知</h6>
+          <button type="button" class="btn-close btn-close-sm" onclick="toggleNotifications()"></button>
+        </div>
+        <div class="notification-content">
+          <% if @expiring_contracts&.any? %>
+            <div class="notification-section">
+              <h6 class="text-warning mb-2">
+                <i class="fas fa-exclamation-triangle me-1"></i>満了予定の契約書
+              </h6>
+              <% @expiring_contracts.each do |contract| %>
+                <div class="notification-item">
+                  <div class="notification-title">
+                    <%= link_to contract.title, admin_contract_path(contract), class: "text-decoration-none" %>
+                  </div>
+                  <div class="notification-detail">
+                    満了日: <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                    (残り<%= (contract.expiration_date - Date.current).to_i %>日)
+                  </div>
+                </div>
+              <% end %>
             </div>
-
-            <!-- キーワード検索 -->
-            <%= text_field_tag :keyword, params[:keyword], placeholder: "キーワードを入力", class: "form-control form-control-sm w-auto" %>
-
-            <!-- 契約書検索時の追加フィルター -->
-            <div id="contract-filters" style="display: none;">
-              <div>
-                <%= label_tag :status_id, "ステータス", class: "form-label me-1" %>
-                <%= select_tag :status_id,
-                    options_from_collection_for_select(Status.all, :id, :name, params[:status_id]),
-                    include_blank: "すべて", class: "form-select form-select-sm d-inline w-auto" %>
-              </div>
-
-              <div>
-                <%= label_tag :tag, "タグ", class: "form-label me-1" %>
-                <%= select_tag :tag,
-                    options_for_select(ActsAsTaggableOn::Tag.pluck(:name), params[:tag]),
-                    include_blank: "すべて", class: "form-select form-select-sm d-inline w-auto" %>
+          <% end %>
+          
+          <% if @renewal_contracts&.any? %>
+            <div class="notification-section">
+              <h6 class="text-info mb-2">
+                <i class="fas fa-sync-alt me-1"></i>更新予定の契約書
+              </h6>
+              <% @renewal_contracts.each do |contract| %>
+                <div class="notification-item">
+                  <div class="notification-title">
+                    <%= link_to contract.title, admin_contract_path(contract), class: "text-decoration-none" %>
+                  </div>
+                  <div class="notification-detail">
+                    更新日: <%= contract.renewal_date.strftime('%Y/%m/%d') %>
+                    (残り<%= (contract.renewal_date - Date.current).to_i %>日)
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+          
+          <% if @comment_notifications&.any? %>
+            <div class="notification-section">
+              <h6 class="text-warning mb-2">
+                <i class="fas fa-comment me-1"></i>コメント通知
+              </h6>
+              <% @comment_notifications.each do |notification| %>
+                <div class="notification-item">
+                  <div class="notification-title">
+                    <%= link_to notification.comment.contract.title, admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                  </div>
+                  <div class="notification-detail">
+                    <%= notification.comment.commentable.name %>さんがコメントしました
+                    <small class="text-muted d-block">
+                      <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
+                    </small>
+                  </div>
+                  <%= link_to "既読", mark_as_read_admin_comment_notification_path(notification), method: :patch, class: "btn btn-sm btn-outline-secondary mt-1" %>
+                </div>
+              <% end %>
+              <div class="mt-2">
+                <%= link_to "全て既読にする", mark_all_as_read_admin_comment_notifications_path, method: :patch, class: "btn btn-sm btn-outline-primary" %>
               </div>
             </div>
-
-            <%= submit_tag "検索", class: "btn btn-sm btn-outline-primary" %>
+          <% end %>
+          
+          <% if !@expiring_contracts&.any? && !@renewal_contracts&.any? && !@comment_notifications&.any? %>
+            <div class="notification-empty">
+              <i class="fas fa-check-circle text-success mb-2"></i>
+              <p class="mb-0">通知はありません</p>
+            </div>
           <% end %>
         </div>
       </div>
     <% end %>
 
+    <!-- フラッシュメッセージ＋エラーメッセージ -->
+    <% if notice %>
+      <div class="alert alert-success flash-message alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i><%= notice %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% end %>
+    
+    <% if alert %>
+      <div class="alert alert-danger flash-message alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i><%= alert %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% end %>
+    
+    <% if flash[:validation_errors] %>
+      <div class="alert alert-danger flash-message alert-dismissible fade show" role="alert">
+        <h5 class="fw-bold"><%= pluralize(flash[:validation_errors].count, "件のエラー") %>があります:</h5>
+        <ul class="mb-0">
+          <% flash[:validation_errors].each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% end %>
+
+
+
+    <!-- メイン -->
+    <main style="max-width: 3000px; margin: 0 auto; padding: 0 20px;">
+      <%= yield %>
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-white border-top shadow-sm <%= (controller_name == 'sessions' && action_name == 'new') ? 'mt-0' : 'mt-5' %>">
+      <div class="container py-5">
+        <div class="row text-muted small align-items-start">
+    
+          <!-- 左：ロゴと名称＋説明 -->
+          <div class="col-md-4 mb-4 mb-md-0">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-user-shield text-primary me-2 fa-lg"></i>
+              <span class="fw-semibold text-dark">Contrack Admin</span>
+            </div>
+            <p class="mb-0 lh-sm">
+              契約管理を、もっとスマートに。<br>
+              管理者向け管理システム
+            </p>
+          </div>
+    
+          <!-- 中央：リンク風の情報ブロック -->
+          <div class="col-md-4 mb-4 mb-md-0 text-center">
+            <div class="fw-semibold text-dark mb-2">管理機能</div>
+            <ul class="list-unstyled mb-0">
+              <li class="mb-1">契約書管理</li>
+              <li class="mb-1">ユーザー管理</li>
+              <li>グループ管理</li>
+            </ul>
+          </div>
+    
+          <!-- 右：会社情報風 -->
+          <div class="col-md-4 text-md-end text-center">
+            <div class="fw-semibold mb-1">提供：Contrack開発チーム</div>
+            <div class="text-muted small">
+              &copy; <%= Time.current.year %> Contrack, Inc.<br class="d-md-none">
+              All rights reserved.
+            </div>
+          </div>
+    
+        </div>
+      </div>
+    </footer>
+
+    <!-- JS for flash message auto-dismiss -->
     <script>
-      // 検索対象が変更された時の処理
       document.addEventListener('DOMContentLoaded', function() {
-        const searchTypeSelect = document.getElementById('search_type');
-        const contractFilters = document.getElementById('contract-filters');
-        
-        function toggleFilters() {
-          if (searchTypeSelect.value === 'contracts') {
-            contractFilters.style.display = 'flex';
-          } else {
-            contractFilters.style.display = 'none';
+        // フラッシュメッセージとエラーメッセージの自動消去
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          // 5秒後に自動消去
+          setTimeout(function() {
+            alert.classList.add('fade-out');
+            setTimeout(function() {
+              alert.remove();
+            }, 500);
+          }, 5000);
+          
+          // 閉じるボタンのクリックイベント
+          const closeButton = alert.querySelector('.btn-close');
+          if (closeButton) {
+            closeButton.addEventListener('click', function() {
+              alert.classList.add('fade-out');
+              setTimeout(function() {
+                alert.remove();
+              }, 500);
+            });
           }
+        });
+
+        // エラーメッセージが表示されている場合、ページ遷移時にクリア
+        if (document.querySelector('.alert-danger')) {
+          window.addEventListener('beforeunload', function() {
+            // エラーメッセージをクリア
+            const errorAlerts = document.querySelectorAll('.alert-danger');
+            errorAlerts.forEach(function(alert) {
+              alert.remove();
+            });
+          });
         }
-        
-        searchTypeSelect.addEventListener('change', toggleFilters);
-        toggleFilters(); // 初期表示
       });
     </script>
 
-    <!-- フラッシュメッセージ -->
-    <div class="container mt-3" style="max-width: 1000px;">
-      <% flash.each do |key, value| %>
-        <div class="alert alert-<%= key == 'notice' ? 'success' : 'danger' %>" role="alert">
-          <%= value %>
-        </div>
-      <% end %>
-    </div>
+    <!-- JS for notification dropdown -->
+    <script>
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationDropdown');
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+          dropdown.style.display = 'block';
+        } else {
+          dropdown.style.display = 'none';
+        }
+      }
 
-    <!-- メイン -->
-    <main class="container mt-4" style="max-width: 1000px;">
-      <%= yield %>
-    </main>
+      // 通知ドロップダウンの外側をクリックした時に閉じる
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notificationDropdown');
+        const bell = document.querySelector('.notification-container button');
+        if (!dropdown || !bell) return;
+        
+        if (!dropdown.contains(event.target) && !bell.contains(event.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    </script>
+
+    <!-- 共通画像プレビューモーダル -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="imageModalLabel">画像プレビュー</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center p-0">
+            <img id="modalImage" src="" class="img-fluid" style="max-height: 80vh; width: auto;" alt="">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+            <a id="downloadLink" href="" class="btn btn-primary" download>
+              <i class="fas fa-download me-1"></i>ダウンロード
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </body>
 </html>

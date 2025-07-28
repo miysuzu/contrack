@@ -1,0 +1,165 @@
+<%= form_with model: @template, local: true do |f| %>
+
+  <!-- エラーメッセージ -->
+  <% if flash[:validation_errors] %>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <h5 class="fw-bold"><%= pluralize(flash[:validation_errors].count, "件のエラー") %>があります:</h5>
+      <ul class="mb-0">
+        <% flash[:validation_errors].each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% end %>
+
+  <div class="row g-4">
+    <!-- メインフォーム（左・約70%） -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-header bg-secondary bg-opacity-25 text-dark rounded-top-4">
+          <h5 class="mb-0 fw-bold text-primary">
+            <i class="fas fa-cog me-2"></i>テンプレート基本設定
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <%= f.label :name, 'テンプレート名', class: 'form-label fw-semibold' %>
+            <%= f.text_field :name, class: 'form-control rounded-3 shadow-sm', placeholder: '例: 新規契約書通知' %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :category, 'カテゴリ', class: 'form-label fw-semibold' %>
+            <%= f.select :category, 
+                SlackMessageTemplate.categories.map { |k, v| [v, k] }, 
+                { prompt: 'カテゴリを選択してください' }, 
+                class: 'form-select rounded-3 shadow-sm' %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :content, 'メッセージ内容', class: 'form-label fw-semibold' %>
+            <%= f.text_area :content, class: 'form-control rounded-3 shadow-sm', rows: 12, 
+                placeholder: "✏️ *契約書の内容が変更されました*
+
+【契約書名】: {{title}}
+【作成者】: {{user_name}}
+【ステータス】: {{status}}
+【満了日】: {{expiration_date}}
+【更新日】: {{renewal_date}}
+【グループ】: {{group_name}}
+【タグ】: {{tags}}
+
+詳細はこちら: {{url}}" %>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check">
+              <%= f.check_box :is_default, class: 'form-check-input' %>
+              <%= f.label :is_default, 'デフォルトテンプレートとして設定', class: 'form-check-label fw-semibold' %>
+            </div>
+            <div class="form-text text-muted">
+              <i class="fas fa-lightbulb me-1"></i>
+              デフォルトテンプレートは、契約書詳細ページで自動的に選択されます
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- サイドバー（右・約30%） -->
+    <div class="col-12 col-lg-4">
+      <!-- 変数一覧と例 -->
+      <div class="card shadow-sm rounded-4 border-0 mb-3">
+        <div class="card-header bg-secondary bg-opacity-25 text-dark rounded-top-4">
+          <h5 class="mb-0 fw-bold text-primary">
+            <i class="fas fa-code me-2"></i>使用可能な変数
+          </h5>
+          <small class="d-block mt-1 text-dark">
+            <i class="fas fa-info-circle me-1"></i>
+            変数は <code>{{変数名}}</code> の形式で使用できます
+          </small>
+        </div>
+        <div class="card-body p-3">
+          <div class="mb-3">
+            <h6 class="text-primary fw-bold mb-2">
+              <i class="fas fa-info-circle me-1"></i>基本情報
+            </h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <ul class="list-unstyled small">
+                  <li><code class="bg-light px-1 rounded">{{title}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{user_name}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{status}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{group_name}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{tags}}</code></li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <ul class="list-unstyled small text-muted">
+                  <li>契約書タイトル</li>
+                  <li>作成者名</li>
+                  <li>ステータス</li>
+                  <li>グループ名</li>
+                  <li>タグ</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <h6 class="text-primary fw-bold mb-2">
+              <i class="fas fa-calendar me-1"></i>日付情報
+            </h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <ul class="list-unstyled small">
+                  <li><code class="bg-light px-1 rounded">{{expiration_date}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{renewal_date}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{conclusion_date}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{days_until_expiration}}</code></li>
+                  <li><code class="bg-light px-1 rounded">{{days_until_renewal}}</code></li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <ul class="list-unstyled small text-muted">
+                  <li>満了日</li>
+                  <li>更新日</li>
+                  <li>締結日</li>
+                  <li>満了までの日数</li>
+                  <li>更新までの日数</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h6 class="text-primary fw-bold mb-2">
+              <i class="fas fa-link me-1"></i>その他
+            </h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <ul class="list-unstyled small">
+                  <li><code class="bg-light px-1 rounded">{{url}}</code></li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <ul class="list-unstyled small text-muted">
+                  <li>契約書のURL</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ボタンエリア -->
+  <div class="d-flex gap-3 justify-content-center mt-5">
+    <%= f.submit @template.new_record? ? "テンプレートを作成" : "テンプレートを更新", class: "btn btn-primary px-4 rounded-pill shadow-sm fw-semibold" %>
+    <%= link_to slack_message_templates_path, class: "btn btn-secondary px-4 rounded-pill shadow-sm fw-semibold" do %>
+      <i class="fas fa-arrow-left me-2"></i>一覧に戻る
+    <% end %>
+  </div>
+<% end %> 

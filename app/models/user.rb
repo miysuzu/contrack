@@ -4,6 +4,13 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   has_many :contracts, dependent: :destroy
+  has_many :comments, as: :commentable, dependent: :destroy
+  has_many :group_users, dependent: :destroy
+  has_many :groups, through: :group_users
+  has_many :contract_user_shares, dependent: :destroy
+  has_many :shared_contracts, through: :contract_user_shares, source: :contract
+  has_many :comment_notifications, dependent: :destroy
+  belongs_to :company, optional: true
   
   # バリデーション
   validates :name, presence: true, length: { maximum: 50 }

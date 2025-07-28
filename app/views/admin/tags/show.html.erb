@@ -1,0 +1,137 @@
+<!-- Heroセクション -->
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-tag me-3"></i>タグ詳細
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">タグの詳細情報と関連契約書を確認できます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <!-- タグ情報 -->
+      <div class="card shadow mb-4" style="border-radius: 16px;">
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bold mb-3">
+            <i class="fas fa-info-circle me-2"></i>タグ情報
+          </h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold text-muted">タグ名</label>
+              <div>
+                <span class="badge bg-info text-dark px-4 py-3 fs-5 rounded-pill">
+                  <i class="fas fa-tag me-2"></i><%= @tag.name %>
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold text-muted">使用回数</label>
+              <div>
+                <span class="badge bg-secondary px-4 py-3 fs-5 rounded-pill">
+                  <i class="fas fa-link me-2"></i><%= @tag.taggings_count %>件
+                </span>
+              </div>
+            </div>
+          </div>
+          <% if @tag.created_at %>
+            <div class="mt-3">
+              <label class="form-label fw-bold text-muted">作成日</label>
+              <div>
+                <i class="fas fa-calendar-alt text-muted me-2"></i>
+                <%= l(@tag.created_at, format: :long) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- 関連契約書 -->
+      <div class="card shadow mb-4" style="border-radius: 16px;">
+        <div class="card-body">
+          <h5 class="card-title text-primary fw-bold mb-3">
+            <i class="fas fa-file-contract me-2"></i>このタグが付いている契約書（<%= @contracts.count %>件）
+          </h5>
+          <% if @contracts.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>ユーザー</th>
+                    <th>タイトル</th>
+                    <th>ステータス</th>
+                    <th>作成日</th>
+                    <th class="text-end">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @contracts.each do |contract| %>
+                    <tr>
+                      <td>
+                        <i class="fas fa-user text-muted me-2"></i>
+                        <%= contract.user&.name || "管理者作成" %>
+                      </td>
+                      <td>
+                        <%= link_to admin_contract_path(contract), class: "fw-bold text-decoration-none" do %>
+                          <i class="fas fa-file-alt me-1"></i><%= contract.title %>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% case contract.status.name
+                           when "下書き" %>
+                          <span class="badge bg-light text-dark rounded-pill">
+                            <i class="fas fa-edit me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% when "送信済" %>
+                          <span class="badge bg-warning text-dark rounded-pill">
+                            <i class="fas fa-paper-plane me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% when "締結済" %>
+                          <span class="badge bg-success rounded-pill">
+                            <i class="fas fa-check-circle me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% else %>
+                          <span class="badge bg-secondary text-dark rounded-pill">
+                            <i class="fas fa-circle me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <i class="fas fa-calendar-alt text-muted me-1"></i>
+                        <%= l(contract.created_at, format: :short) %>
+                      </td>
+                      <td class="text-end">
+                        <%= link_to admin_contract_path(contract), class: "btn btn-sm btn-outline-primary" do %>
+                          <i class="fas fa-eye me-1"></i>詳細
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
+              <i class="fas fa-file-contract text-muted mb-3" style="font-size: 3rem;"></i>
+              <h5 class="text-muted">このタグが付いている契約書はありません</h5>
+              <p class="text-muted mb-0">契約書にこのタグを追加すると、ここに表示されます。</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- 戻るボタン -->
+      <div class="text-center">
+        <%= link_to admin_tags_path, class: "btn btn-secondary px-4 me-2" do %>
+          <i class="fas fa-arrow-left me-2"></i>タグ一覧に戻る
+        <% end %>
+        <%= link_to admin_contracts_path, class: "btn btn-primary px-4" do %>
+          <i class="fas fa-file-contract me-2"></i>契約書一覧に戻る
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+</main>

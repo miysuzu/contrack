@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :unsubscribe, :withdraw]
 
   def show
-    @contracts = @user.contracts.order(created_at: :desc)
+    @contracts = @user.contracts.order(created_at: :desc).page(params[:page]).per(15)
   end
 
   def edit

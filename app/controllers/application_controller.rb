@@ -1,10 +1,12 @@
 class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :set_notifications, if: :user_signed_in?
 
   protected
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:name])
   end
 
   def after_sign_out_path_for(resource_or_scope)
@@ -12,6 +14,14 @@ class ApplicationController < ActionController::Base
       new_admin_session_path
     else
       root_path
+    end
+  end
+
+  def after_sign_in_path_for(resource_or_scope)
+    if resource_or_scope == :admin
+      admin_root_path
+    else
+      contracts_path
     end
   end
 
@@ -23,5 +33,18 @@ class ApplicationController < ActionController::Base
     else
       'application'
     end
+  end
+
+  def set_notifications
+    # ユーザーの会社に属する契約書を取得（admin_only: falseのもののみ）
+    company_contracts = Contract.where(company_id: current_user.company_id, admin_only: false)
+    
+    @expiring_contracts = company_contracts.where("expiration_date BETWEEN ? AND ?", Date.today, Date.today + 30)
+    @renewal_contracts = company_contracts.where("renewal_date BETWEEN ? AND ?", Date.today, Date.today + 7)
+    
+    # コメント通知を取得
+    @comment_notifications = current_user.comment_notifications.unread.order(created_at: :desc).limit(10)
+    
+    @notification_count = @expiring_contracts.size + @renewal_contracts.size + @comment_notifications.size
   end
 end

@@ -1,0 +1,86 @@
+<!-- Heroセクション -->
+<section class="hero-section bg-contracts">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">プロフィール編集</h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">管理者アカウントの情報を編集できます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 800px; min-height: calc(100vh - 900px);">
+
+  <!-- プロフィール編集フォーム -->
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fas fa-user-edit me-2"></i>管理者情報編集
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      <%= form_with model: @admin, url: admin_mypage_path, method: :patch, local: true do |f| %>
+        <% if @admin.errors.any? %>
+          <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <h5 class="fw-bold"><%= pluralize(@admin.errors.count, "件のエラー") %>があります:</h5>
+            <ul class="mb-0">
+              <% @admin.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-4">
+              <%= f.label :name, "名前", class: "form-label fw-semibold" %>
+              <%= f.text_field :name, class: "form-control form-control-lg rounded-3", placeholder: "管理者名を入力" %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-4">
+              <%= f.label :email, "メールアドレス", class: "form-label fw-semibold" %>
+              <%= f.email_field :email, class: "form-control form-control-lg rounded-3", placeholder: "メールアドレスを入力" %>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-muted">所属会社</label>
+              <p class="form-control-plaintext fs-5">
+                <%= @admin.company&.name || '未設定' %>
+              </p>
+              <small class="text-muted">所属会社の変更は管理者にお問い合わせください。</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-muted">アカウント作成日</label>
+              <p class="form-control-plaintext fs-5">
+                <%= @admin.created_at.strftime('%Y年%m月%d日 %H:%M') %>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- アクションボタン -->
+        <div class="d-flex gap-3 justify-content-center mt-5">
+          <%= f.submit "更新する", class: "btn btn-primary px-4 rounded-pill shadow-sm" %>
+          <%= link_to admin_mypage_path, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+            <i class="fas fa-times me-2"></i>キャンセル
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 戻るボタン -->
+  <div class="text-center mt-4">
+    <%= link_to admin_mypage_path, class: "btn btn-outline-secondary px-4 rounded-pill shadow-sm" do %>
+      <i class="fas fa-arrow-left me-2"></i>マイページに戻る
+    <% end %>
+  </div>
+
+</main> 

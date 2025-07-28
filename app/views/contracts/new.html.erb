@@ -1,9 +1,16 @@
-<div class="container fade-in" style="max-width: 700px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">契約書を新規作成</h2>
-
-  <%= render 'form' %>
-
-  <div class="mt-4 text-center">
-    <%= link_to "一覧に戻る", contracts_path, class: "btn btn-secondary px-4" %>
+<section class="hero-section bg-contracts">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">契約書を新規作成</h2>
   </div>
+</section>
+
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 48px auto 0 auto; padding-left: 24px; padding-right: 24px;">
+  <div class="card shadow" style="border-radius: 16px;">
+    <div class="card-body">
+      <%= render 'form' %>
+    </div>
+  </div>
+</div>
+<div class="mt-5 text-center">
+  <%= link_to "一覧へ戻る", contracts_path, class: "btn btn-secondary px-4" %>
 </div>

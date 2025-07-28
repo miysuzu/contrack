@@ -1,35 +1,121 @@
-<div class="container fade-in" style="max-width: 900px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">会員一覧</h2>
-  <table class="table table-striped align-middle shadow-sm">
-    <thead class="table-light">
-      <tr>
-        <th>ID</th>
-        <th>氏名</th>
-        <th>メールアドレス</th>
-        <th>ステータス</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @users.each do |user| %>
-        <tr>
-          <td><%= user.id %></td>
-          <td><%= user.name %></td>
-          <td><%= user.email %></td>
-          <td>
+<!-- Heroセクション -->
+<section class="hero-section bg-contracts">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">会員一覧</h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">登録されている会員の一覧と管理を行います</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+
+  <%# --- 検索・フィルター --- %>
+  <div class="card rounded-4 shadow-sm mb-5 border-0 search-card">
+    <div class="card-body">
+      <%= form_with url: admin_users_path, method: :get, local: true do %>
+        <div class="row g-4 align-items-end">
+          <div class="col-lg-6">
+            <label class="form-label fw-semibold">キーワード検索</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <%= text_field_tag :keyword, params[:keyword], class: "form-control", placeholder: "名前・メールアドレスで検索..." %>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label fw-semibold">ステータス</label>
+            <%= select_tag :status, 
+                options_for_select([
+                  ["すべて", ""],
+                  ["有効", "active"],
+                  ["退会", "inactive"]
+                ], params[:status]), 
+                class: "form-select" %>
+          </div>
+          <div class="col-lg-3">
+            <div class="d-flex gap-2">
+              <%= submit_tag "検索", class: "btn btn-outline-primary w-50" %>
+              <%= link_to "クリア", admin_users_path, class: "btn btn-outline-secondary w-50" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# --- セクション区切り線 --- %>
+  <div class="section-divider"></div>
+
+  <%# --- 検索結果件数 --- %>
+  <% if params[:keyword].present? || params[:status].present? %>
+    <div class="mb-4">
+      <div class="alert alert-info rounded-3">
+        <i class="fas fa-search me-2"></i>
+        検索結果: <strong><%= @users.count %></strong>件
+        <% if params[:keyword].present? %>
+          <br>キーワード: <strong>"<%= params[:keyword] %>"</strong>
+        <% end %>
+        <% if params[:status].present? %>
+          <br>ステータス: <strong><%= params[:status] == 'active' ? '有効' : '退会' %></strong>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# --- 会員リスト --- %>
+  <% @users.each do |user| %>
+    <div class="card mb-4 p-3 shadow-sm fade-in rounded-4">
+      <div class="d-md-flex justify-content-between align-items-start gap-4">
+        <div class="flex-fill">
+          <div class="d-flex align-items-center mb-2">
+            <% if user.is_active %>
+              <i class="fas fa-user-check text-success me-2"></i>
+            <% else %>
+              <i class="fas fa-user-times text-secondary me-2"></i>
+            <% end %>
+            <h5 class="fw-bold text-primary mb-0">
+              <%= link_to user.name, admin_user_path(user), class: "text-decoration-none text-primary" %>
+            </h5>
+          </div>
+
+          <div class="mb-2">
+            <span class="badge bg-light status-badge">ID: <%= user.id %></span>
             <% if user.is_active %>
               <span class="badge bg-success">有効</span>
             <% else %>
-              <span class="badge bg-secondary text-dark">退会</span>
+              <span class="badge bg-secondary">退会</span>
             <% end %>
-          </td>
-          <td>
-            <%= link_to '詳細', admin_user_path(user), class: "btn btn-sm btn-outline-primary me-1" %>
-            <%= link_to '編集', edit_admin_user_path(user), class: "btn btn-sm btn-outline-secondary" %>
-          </td>
-        </tr>
+          </div>
+
+          <div class="small text-muted">
+            <i class="fas fa-envelope me-1"></i><%= user.email %>
+            <% if user.company %>
+              <br><i class="fas fa-building me-1"></i><%= user.company.name %>
+            <% end %>
+          </div>
+        </div>
+
+        <%# 操作ボタン %>
+        <div class="action-buttons mt-3 mt-md-0 d-flex gap-2">
+          <%= link_to admin_user_path(user), class: "btn btn-sm btn-outline-primary rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+            <i class="fas fa-eye"></i><span>詳細</span>
+          <% end %>
+          <%= link_to edit_admin_user_path(user), class: "btn btn-sm btn-outline-warning rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+            <i class="fas fa-edit"></i><span>編集</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @users.empty? %>
+    <div class="text-center py-5">
+      <i class="fas fa-users text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+      <% if current_admin.company %>
+        <p class="text-muted mt-3">会員がまだ登録されていません。</p>
+      <% else %>
+        <p class="text-muted mt-3">会社に所属していません。会員管理機能を使用するには会社に所属する必要があります。</p>
       <% end %>
-    </tbody>
-  </table>
-</div>
+    </div>
+  <% end %>
+
+</main>
 

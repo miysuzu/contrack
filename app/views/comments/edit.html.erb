@@ -1,0 +1,32 @@
+<section class="hero-section bg-contracts">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">メモを編集</h2>
+  </div>
+</section>
+
+<main class="container my-5">
+
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <%# --- 編集フォーム --- %>
+      <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-body p-4">
+          <%= form_with model: [@contract, @comment], local: true do |f| %>
+            <div class="mb-4">
+              <%= f.label :content, "メモ内容", class: "form-label fw-semibold" %>
+              <%= f.text_area :content, class: "form-control rounded-3 shadow-sm", rows: 5, placeholder: "メモを入力してください..." %>
+            </div>
+            
+            <div class="d-flex gap-3 justify-content-center">
+              <%= f.submit "更新", class: "btn btn-primary px-4 rounded-pill shadow-sm" %>
+              <%= link_to @contract, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+                <i class="fas fa-times me-2"></i>キャンセル
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>

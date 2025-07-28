@@ -1,66 +1,258 @@
-<div class="container fade-in" style="max-width: 900px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">契約書一覧</h2>
+<% if params[:keyword].present? || params[:tag].present? || params[:status_id].present? || params[:group_id].present? %>
+  <!-- 検索結果のヒーローセクション -->
+  <section class="hero-section bg-contracts">
+    <div class="container pt-5 text-center text-white">
+      <h2 class="display-3 fw-bold">検索結果</h2>
+      <% if params[:keyword].present? %>
+        <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">「<%= params[:keyword] %>」の検索結果</p>
+      <% else %>
+        <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">検索条件に一致する結果を表示します</p>
+      <% end %>
+    </div>
+  </section>
+<% else %>
+  <!-- 通常のヒーローセクション -->
+  <section class="hero-section bg-contracts">
+    <div class="container pt-5 text-center text-white">
+      <h2 class="display-3 fw-bold">契約書一覧</h2>
+      <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">契約書の検索・管理・作成ができます</p>
+    </div>
+  </section>
+<% end %>
 
-  <div class="mb-4 text-end">
-    <%= link_to "新規作成", new_contract_path, class: "btn btn-primary px-4" %>
-  </div>
+<main class="container my-5" style="max-width: 1400px; min-height: calc(100vh - 900px);">
 
-  <!-- タグ絞り込みリンク -->
-  <div class="mb-3">
-    <span class="me-2">タグで絞り込む：</span>
-    <% ActsAsTaggableOn::Tag.all.each do |tag| %>
-      <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge rounded-pill bg-info text-dark me-1 px-3 py-2" %>
+  <!-- 新規作成ボタン -->
+  <div class="text-end mb-4">
+    <%= link_to new_contract_path, class: "btn btn-success btn-lg rounded-pill px-4 shadow" do %>
+      <i class="fas fa-plus me-2"></i>新規作成
     <% end %>
   </div>
 
-  <!-- ステータス絞り込みフォーム -->
-  <%= form_with url: contracts_path, method: :get, local: true, class: "mb-4 row g-2 align-items-center" do %>
-    <div class="col-auto">
-      <%= select_tag :status_id, options_from_collection_for_select(Status.all, :id, :name, params[:status_id]), include_blank: "すべて", class: "form-select" %>
-    </div>
-    <div class="col-auto">
-      <%= submit_tag "絞り込む", class: "btn btn-outline-primary" %>
-    </div>
-  <% end %>
-
-  <table class="table table-striped align-middle shadow-sm">
-    <thead class="table-light">
-      <tr>
-        <th>タイトル</th>
-        <th>ステータス</th>
-        <th>タグ</th>
-        <th>作成日</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @contracts.each do |contract| %>
-        <tr>
-          <td><%= link_to contract.title, contract_path(contract), class: "fw-bold text-decoration-none" %></td>
-          <td>
-            <% case contract.status.name
-               when "下書き" %>
-              <span class="badge bg-light text-dark"><%= contract.status.name %></span>
-            <% when "送信済" %>
-              <span class="badge bg-warning text-dark"><%= contract.status.name %></span>
-            <% when "締結済" %>
-              <span class="badge bg-success"><%= contract.status.name %></span>
-            <% else %>
-              <span class="badge bg-secondary text-dark"><%= contract.status.name %></span>
-            <% end %>
-          </td>
-          <td>
-            <% contract.tags.each do |tag| %>
-              <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-1" %>
-            <% end %>
-          </td>
-          <td><%= l(contract.created_at, format: :short) %></td>
-          <td>
-            <%= link_to "詳細", contract_path(contract), class: "btn btn-sm btn-outline-primary me-1" %>
-            <%= link_to "編集", edit_contract_path(contract), class: "btn btn-sm btn-outline-warning me-1" %>
-          </td>
-        </tr>
+  <!-- 検索・フィルター -->
+  <div class="card rounded-4 shadow-sm mb-5 border-0 search-card">
+    <div class="card-body">
+      <%= form_with url: contracts_path, method: :get, local: true do %>
+        <div class="row g-4 align-items-end">
+          <div class="col-lg-6">
+            <label class="form-label fw-semibold">キーワード検索</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <%= text_field_tag :keyword, params[:keyword], 
+                  class: "form-control", 
+                  placeholder: "タイトルまたは内容で検索..." %>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label fw-semibold">並び順</label>
+            <%= select_tag :sort, 
+                options_for_select([
+                  ["作成日順（新しい順）", "created_desc"],
+                  ["作成日順（古い順）", "created_asc"],
+                  ["更新日順（新しい順）", "updated_desc"],
+                  ["更新日順（古い順）", "updated_asc"],
+                  ["満了日順（近い順）", "expiration_asc"],
+                  ["満了日順（遠い順）", "expiration_desc"],
+                  ["タイトル順", "title_asc"]
+                ], params[:sort] || "created_desc"),
+                class: "form-select" %>
+          </div>
+          <div class="col-lg-3">
+            <div class="d-flex gap-2">
+              <%= submit_tag "検索", class: "btn btn-outline-primary w-50" %>
+              <%= link_to "クリア", contracts_path, class: "btn btn-outline-secondary w-50" %>
+            </div>
+          </div>
+        </div>
       <% end %>
-    </tbody>
-  </table>
-</div>
+
+      <!-- タグフィルタ -->
+      <div class="mt-4">
+        <div class="mb-2 fw-semibold">タグで絞り込む：</div>
+        <% ActsAsTaggableOn::Tag.all.each do |tag| %>
+          <%= link_to tag.name, contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort]), 
+              class: "badge rounded-pill bg-info text-dark me-2 px-3 py-2 text-decoration-none" %>
+        <% end %>
+      </div>
+
+      <!-- ステータスフィルタ -->
+      <div class="row mt-4 align-items-center">
+        <div class="col-md-3 fw-semibold">ステータスで絞り込み：</div>
+        <div class="col-md-6">
+          <div class="btn-group flex-wrap" role="group">
+            <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort]), 
+                class: "btn btn-outline-secondary #{'active' unless params[:status_id].present?}" %>
+            <% Status.all.each do |status| %>
+              <%= link_to status.name, contracts_path(status_id: status.id, keyword: params[:keyword], sort: params[:sort]), 
+                  class: "btn btn-outline-secondary #{'active' if params[:status_id].to_i == status.id}" %>
+            <% end %>
+          </div>
+        </div>
+        <div class="col-md-3 text-end">
+          <span class="badge bg-secondary fs-6">全<%= @contracts.total_count %>件</span>
+        </div>
+      </div>
+
+      <!-- グループフィルタ -->
+      <% if current_user.company %>
+        <div class="row mt-4 align-items-center">
+          <div class="col-md-3 fw-semibold">グループで絞り込み：</div>
+          <div class="col-md-6">
+            <div class="btn-group flex-wrap" role="group">
+              <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+                  class: "btn btn-outline-secondary #{'active' unless params[:group_id].present?}" %>
+              <% Group.where(company_id: current_user.company_id).order(:name).each do |group| %>
+                <%= link_to group.name, contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+                    class: "btn btn-outline-secondary #{'active' if params[:group_id].to_i == group.id}" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- メインコンテンツエリア -->
+  <div class="row">
+    <!-- 左サイドバー - グループ選択 -->
+    <div class="col-md-3">
+      <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-body">
+          <h6 class="text-primary fw-bold mb-3">[所属グループ]</h6>
+          
+          <!-- すべてのグループ -->
+          <%= link_to contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+              class: "btn #{params[:group_id].blank? ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
+            <i class="fas fa-users me-2"></i>すべてのグループ
+          <% end %>
+
+          <!-- グループ一覧 -->
+          <% if current_user.company %>
+            <% Group.where(company_id: current_user.company_id).order(:name).each do |group| %>
+              <%= link_to contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+                  class: "btn #{params[:group_id].to_i == group.id ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
+                <i class="fas fa-users me-2"></i><%= group.name %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <!-- グループ追加ボタン -->
+          <%= link_to group_searches_path, class: "btn btn-outline-info w-100 rounded-pill" do %>
+            <i class="fas fa-plus me-2"></i>グループを追加
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右メインエリア - 契約一覧 -->
+    <div class="col-md-9">
+      <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">
+              <% if params[:group_id].present? %>
+                <% selected_group = Group.find(params[:group_id]) %>
+                <%= selected_group.name %>の契約一覧
+              <% else %>
+                すべての契約一覧
+              <% end %>
+            </h5>
+            <span class="badge bg-secondary fs-6">全<%= @contracts.total_count %>件</span>
+          </div>
+
+          <% if @contracts.where(admin_only: false).any? %>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>タイトル</th>
+                    <th>ステータス</th>
+                    <th>タグ</th>
+                    <th>期間</th>
+                    <th>更新日</th>
+                    <th class="text-end">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @contracts.where(admin_only: false).each do |contract| %>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <span class="fw-bold text-primary">
+                            <%= link_to contract.title, contract_path(contract), class: "text-decoration-none text-primary" %>
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <% case contract.status.name
+                           when "下書き" %>
+                          <span class="badge bg-light text-dark rounded-pill">
+                            <i class="fas fa-edit me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% when "送信済" %>
+                          <span class="badge bg-warning text-dark rounded-pill">
+                            <i class="fas fa-paper-plane me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% when "締結済" %>
+                          <span class="badge bg-success rounded-pill">
+                            <i class="fas fa-check-circle me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% else %>
+                          <span class="badge bg-secondary text-dark rounded-pill">
+                            <i class="fas fa-circle me-1"></i><%= contract.status.name %>
+                          </span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% contract.tags.each do |tag| %>
+                          <%= link_to tag.name, contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id], group_id: params[:group_id]),
+                              class: "badge bg-info text-dark me-1 text-decoration-none rounded-pill" %>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
+                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                        <% elsif contract.conclusion_date.present? %>
+                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~
+                        <% elsif contract.expiration_date.present? %>
+                          ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                        <% else %>
+                          -
+                        <% end %>
+                      </td>
+                      <td>
+                        <%= contract.renewal_date&.strftime('%Y/%m/%d') || "未設定" %>
+                      </td>
+                      <td class="text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                          <%= link_to contract_path(contract), class: "btn btn-sm btn-outline-primary rounded-pill" do %>
+                            <i class="fas fa-eye me-1"></i>詳細
+                          <% end %>
+                          <%= link_to edit_contract_path(contract), class: "btn btn-sm btn-outline-warning rounded-pill" do %>
+                            <i class="fas fa-edit me-1"></i>編集
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
+              <i class="fas fa-file-contract text-muted mb-3" style="font-size: 3rem;"></i>
+              <h5 class="text-muted">契約書がまだ登録されていません</h5>
+              <p class="text-muted mb-0">新しい契約書を作成してください。</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# --- ページネーション --- %>
+      <div class="mt-5">
+        <%= paginate @contracts %>
+      </div>
+    </div>
+  </div>
+
+</main>
