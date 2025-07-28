@@ -2,7 +2,8 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 
-// Bootstrap 5 JavaScript はCDNで読み込み済み
+// Bootstrap 5 JavaScript
+import "bootstrap"
 
 // 通知ドロップダウンの機能
 function toggleNotifications() {

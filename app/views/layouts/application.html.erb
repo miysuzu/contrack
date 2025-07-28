@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Contrack</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head>
+  <title>Contrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <!-- Bootstrap & FontAwesome -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- FontAwesome（CDNでOK） -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 独自CSS -->
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-
-    <!-- JavaScript -->
-    <%= javascript_pack_tag "application", "data-turbo-track": "reload" %>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </head>
+  <!-- Bootstrap + 独自CSS + JS -->
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_pack_tag "application", "data-turbo-track": "reload" %>
+</head>
 
   <body style="background-color: #f0f0f0;">
     <!-- ヘッダー -->
