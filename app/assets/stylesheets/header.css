@@ -319,7 +319,7 @@ body {
   padding: 0.25rem 0.5rem;
 }
 
-<script>function toggleNotifications() {
+/* <script>function toggleNotifications() {
   const dropdown=document.getElementById('notificationDropdown');
 
   if (dropdown.style.display==='none' || dropdown.style.display==='') {
@@ -329,7 +329,7 @@ body {
   else {
     dropdown.style.display='none';
   }
-}
+} */
 
 // 画面クリックで閉じる
 document.addEventListener('click', function(event) {
