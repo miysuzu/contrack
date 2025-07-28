@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_07_28_064452) do
+ActiveRecord::Schema.define(version: 2025_07_22_221124) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -50,26 +50,9 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "company_id"
     t.string "name"
-    t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip"
-    t.string "last_sign_in_ip"
     t.index ["company_id"], name: "index_admins_on_company_id"
     t.index ["email"], name: "index_admins_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admins_on_reset_password_token", unique: true
-  end
-
-  create_table "comment_notifications", force: :cascade do |t|
-    t.integer "admin_id", null: false
-    t.integer "comment_id", null: false
-    t.boolean "read", default: false, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.integer "user_id", null: false
-    t.index ["admin_id"], name: "index_comment_notifications_on_admin_id"
-    t.index ["comment_id"], name: "index_comment_notifications_on_comment_id"
-    t.index ["user_id"], name: "index_comment_notifications_on_user_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -112,9 +95,6 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.date "renewal_date"
     t.integer "group_id"
     t.date "conclusion_date"
-    t.integer "company_id", null: false
-    t.boolean "admin_only"
-    t.index ["company_id"], name: "index_contracts_on_company_id"
     t.index ["group_id"], name: "index_contracts_on_group_id"
   end
 
@@ -144,7 +124,6 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.integer "user_id"
     t.integer "company_id"
     t.text "description"
-    t.boolean "admin_created"
     t.index ["company_id"], name: "index_groups_on_company_id"
     t.index ["user_id"], name: "index_groups_on_user_id"
   end
@@ -158,8 +137,6 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.boolean "is_default"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "admin_id", null: false
-    t.index ["admin_id"], name: "index_slack_message_templates_on_admin_id"
     t.index ["company_id"], name: "index_slack_message_templates_on_company_id"
     t.index ["user_id"], name: "index_slack_message_templates_on_user_id"
   end
@@ -222,13 +199,9 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id", on_delete: :cascade
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admins", "companies"
-  add_foreign_key "comment_notifications", "admins"
-  add_foreign_key "comment_notifications", "comments"
-  add_foreign_key "comment_notifications", "users"
   add_foreign_key "comments", "contracts"
   add_foreign_key "contract_user_shares", "contracts"
   add_foreign_key "contract_user_shares", "users"
-  add_foreign_key "contracts", "companies"
   add_foreign_key "contracts", "groups"
   add_foreign_key "contracts", "statuses"
   add_foreign_key "contracts", "users"
@@ -238,7 +211,6 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
   add_foreign_key "group_users", "users"
   add_foreign_key "groups", "companies"
   add_foreign_key "groups", "users"
-  add_foreign_key "slack_message_templates", "admins"
   add_foreign_key "slack_message_templates", "companies"
   add_foreign_key "slack_message_templates", "users"
   add_foreign_key "taggings", "tags"

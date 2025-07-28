@@ -17,6 +17,7 @@ class Admin::SlackMessageTemplatesController < Admin::ApplicationController
     @template = SlackMessageTemplate.new(template_params)
     @template.admin = current_admin
     @template.user = nil  # 管理者作成の場合はuserをnilに設定
+    @template.company = current_admin.company if current_admin.company
     
     if @template.save
       redirect_to admin_slack_message_templates_path, notice: 'テンプレートを作成しました。'

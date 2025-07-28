@@ -64,7 +64,7 @@ class Admin::ContractsController < Admin::ApplicationController
     # 管理者が選択された場合、user_idをnilに設定
     contract_params_with_admin = contract_params
     if params[:contract][:user_id]&.start_with?('admin_')
-      contract_params_with_admin[:user_id] = nil
+      contract_params_with_admin[:user_id] = current_admin.id
     end
     
     @contract = Contract.new(contract_params_with_admin)
@@ -101,7 +101,7 @@ class Admin::ContractsController < Admin::ApplicationController
     # 管理者が選択された場合、user_idをnilに設定
     contract_params_with_admin = contract_params
     if params[:contract][:user_id]&.start_with?('admin_')
-      contract_params_with_admin[:user_id] = nil
+      contract_params_with_admin[:user_id] = current_admin.id
     end
     
     if @contract.update(contract_params_with_admin)

@@ -1,0 +1,98 @@
+<div class="container my-4">
+  <div class="row">
+    <!-- 左カラム：グループ一覧 -->
+    <div class="col-md-3 border-end">
+      <h5 class="mb-3 text-primary">【所属グループ】</h5>
+      <ul class="list-group mb-3">
+        <% @groups.each do |group| %>
+          <li class="list-group-item <%= 'active' if @selected_group && group.id == @selected_group.id %>">
+            <% if @selected_group && group.id == @selected_group.id %>
+              <strong><%= group.name %></strong>
+            <% else %>
+              <%= link_to group.name, root_path(group_id: group.id), class: 'text-decoration-none' %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <%= link_to '＋グループを追加', group_searches_path, class: 'btn btn-outline-primary w-100' %>
+    </div>
+
+    <!-- 右カラム：契約一覧 -->
+    <div class="col-md-9">
+      <% if @selected_group %>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0"><%= @selected_group.name %> のグループ</h4>
+          <%= link_to '＋新規登録', new_contract_path, class: 'btn btn-success' %>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>タイトル</th>
+                <th>ステータス</th>
+                <th>タグ</th>
+                <th>期間</th>
+                <th>更新日</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @contracts.each do |contract| %>
+                <tr>
+                  <td><%= link_to contract.title, contract_path(contract), class: "fw-bold text-decoration-none text-primary" %></td>
+                  <td>
+                    <% case contract.status&.name
+                       when "下書き" %>
+                      <span class="badge bg-light status-badge"><%= contract.status.name %></span>
+                    <% when "送信済" %>
+                      <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
+                    <% when "締結済" %>
+                      <span class="badge bg-success status-badge"><%= contract.status.name %></span>
+                    <% else %>
+                      <span class="badge bg-secondary status-badge"><%= contract.status&.name %></span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% contract.tags.each do |tag| %>
+                      <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-1 text-decoration-none" %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
+                      <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ～ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                    <% elsif contract.conclusion_date.present? %>
+                      <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ～
+                    <% elsif contract.expiration_date.present? %>
+                      ～ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                    <% else %>
+                      ～
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if contract.renewal_date.present? %>
+                      <%= contract.renewal_date.strftime('%Y/%m/%d') %>
+                    <% else %>
+                      <span class="text-muted">未設定</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <%= link_to contract_path(contract), class: "btn btn-sm btn-outline-primary" do %>
+                        <i class="fas fa-eye me-1"></i>詳細
+                      <% end %>
+                      <%= link_to edit_contract_path(contract), class: "btn btn-sm btn-outline-warning" do %>
+                        <i class="fas fa-edit me-1"></i>編集
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="alert alert-info mt-4">所属グループがありません。</div>
+      <% end %>
+    </div>
+  </div>
+</div>
