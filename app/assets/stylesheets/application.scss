@@ -270,7 +270,8 @@ header {
 /* フラッシュメッセージだけを固定表示 */
 .alert.flash-message {
   position: fixed !important;
-  top: 120px !important; /* ← ヘッダーの高さに応じて調整 */
+  top: 120px !important;
+  /* ← ヘッダーの高さに応じて調整 */
   left: 20px !important;
   z-index: 9999 !important;
   max-width: 600px;
