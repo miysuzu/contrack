@@ -1,0 +1,332 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS (and SCSS, if configured) file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+
+/* Bootstrap 5 はCDNで読み込み済み */
+
+/* Bootstrap 5 カスタマイズ */
+:root {
+  --bs-primary: #009fe8;
+  --bs-primary-rgb: 0, 159, 232;
+  --bs-secondary: #0066cc;
+  --bs-secondary-rgb: 0, 102, 204;
+  --bs-info: #4fc3f7;
+  --bs-info-rgb: 79, 195, 247;
+  --bs-light: #e0f7fa;
+  --bs-light-rgb: 224, 247, 250;
+  --bs-dark: #2c3e50;
+  --bs-dark-rgb: 44, 62, 80;
+  --bs-body-color: #2c3e50;
+  --bs-body-bg: #ffffff;
+  --bs-border-color: #e9ecef;
+  --bs-border-radius: 12px;
+  --bs-border-radius-sm: 8px;
+  --bs-border-radius-lg: 16px;
+  --bs-box-shadow: 0 4px 20px rgba(0, 159, 232, 0.1);
+  --bs-box-shadow-sm: 0 2px 10px rgba(0, 159, 232, 0.1);
+  --bs-box-shadow-lg: 0 8px 30px rgba(0, 159, 232, 0.15);
+}
+
+/* 基本スタイル */
+body {
+  font-family: 'Segoe UI', 'Meiryo', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* ヘッダー */
+header {
+  background: linear-gradient(135deg, var(--bs-body-bg) 0%, var(--bs-light) 100%);
+  border-bottom: 1px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+/* カード */
+.card {
+  border: none;
+  border-radius: var(--bs-border-radius);
+  box-shadow: var(--bs-box-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--bs-box-shadow-lg);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--bs-light) 0%, var(--bs-body-bg) 100%);
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0 !important;
+}
+
+/* ボタン */
+.btn {
+  border-radius: var(--bs-border-radius-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-secondary) 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--bs-secondary) 0%, var(--bs-primary) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 159, 232, 0.2);
+}
+
+.btn-outline-primary {
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  transform: translateY(-1px);
+}
+
+/* フォーム */
+.form-control {
+  border: 2px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 159, 232, 0.1);
+}
+
+.form-select {
+  border: 2px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+}
+
+.form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 159, 232, 0.1);
+}
+
+/* テーブル */
+.table {
+  border-radius: var(--bs-border-radius);
+  overflow: hidden;
+  box-shadow: var(--bs-box-shadow);
+}
+
+.table thead th {
+  background: linear-gradient(135deg, var(--bs-light) 0%, var(--bs-body-bg) 100%);
+  border: none;
+  color: var(--bs-dark);
+  font-weight: 600;
+  padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bs-light);
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+  background-color: rgba(224, 247, 250, 0.3);
+}
+
+/* バッジ */
+.badge {
+  border-radius: 20px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.badge.bg-info {
+  background: linear-gradient(135deg, var(--bs-info) 0%, var(--bs-primary) 100%) !important;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+}
+
+.badge.bg-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  color: var(--bs-dark) !important;
+}
+
+/* アラート */
+.alert {
+  border: none;
+  border-radius: var(--bs-border-radius);
+  border-left: 4px solid var(--bs-primary);
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #e8f5e8 0%, var(--bs-body-bg) 100%);
+  color: #2e7d32;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #ffebee 0%, var(--bs-body-bg) 100%);
+  color: #c62828;
+}
+
+/* ページタイトル */
+.page-title {
+  background: linear-gradient(135deg, var(--bs-light) 0%, var(--bs-body-bg) 100%);
+  border-radius: var(--bs-border-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: var(--bs-box-shadow);
+}
+
+.page-title h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bs-primary);
+}
+
+/* ナビゲーション */
+.nav-link {
+  color: var(--bs-dark) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--bs-primary) !important;
+}
+
+/* 検索カード */
+.search-card {
+  background: linear-gradient(135deg, var(--bs-light) 0%, var(--bs-body-bg) 100%);
+  border: 1px solid var(--bs-border-color);
+}
+
+/* ステータスバッジ */
+.status-badge {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+}
+
+/* アクションボタン */
+.action-buttons .btn {
+  margin: 0 0.25rem;
+}
+
+/* フェードイン効果 */
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 768px) {
+  .page-title h2 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    margin-bottom: 1.25rem;
+  }
+
+  .btn {
+    margin-bottom: 0.5rem;
+  }
+
+  .action-buttons .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Heroセクションのレスポンシブ調整 */
+  .hero-section {
+    min-height: 400px !important;
+  }
+
+  .hero-section h1 {
+    font-size: 2.5rem !important;
+  }
+
+  .hero-section p {
+    font-size: 1rem !important;
+  }
+
+  /* サービス紹介アイコンのレスポンシブ調整 */
+  .service-icon {
+    width: 48px !important;
+    height: 48px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* ビジネスイメージのレスポンシブ調整 */
+  .business-visual {
+    margin-bottom: 2rem;
+  }
+}
+
+/* タブレット用調整 */
+@media (max-width: 992px) and (min-width: 769px) {
+  .hero-section {
+    min-height: 450px !important;
+  }
+
+  .service-icon {
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* 管理者用スタイル */
+.admin-header {
+  background: linear-gradient(135deg, var(--bs-body-bg) 0%, var(--bs-light) 100%);
+}
+
+.admin-title {
+  color: var(--bs-secondary);
+}
+
+/* セクション区切り線 */
+.section-divider {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #888888, #aaaaaa, #888888, transparent);
+  margin: 8rem auto 8rem auto;
+  max-width: 1000px;
+  width: 100%;
+  opacity: 0.8;
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
