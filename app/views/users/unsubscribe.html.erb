@@ -1,11 +1,101 @@
-<div class="container fade-in" style="max-width: 500px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">退会確認</h2>
-  <p class="mb-4">
-    退会すると、今後このアカウントでログインできなくなります。<br>
-    本当に退会してよろしいですか？
-  </p>
-  <%= form_with url: withdraw_user_path, method: :patch, local: true do %>
-    <%= submit_tag "退会する", class: "btn btn-danger px-4" %>
-    <%= link_to "マイページに戻る", user_mypage_path, class: "btn btn-outline-secondary ms-2 px-4" %>
-  <% end %>
-</div>
+<!-- Heroセクション -->
+<section class="hero-section bg-dashboard">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-exclamation-triangle me-3"></i>退会確認
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">アカウントの退会について確認してください</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+
+  <!-- 退会により失われるもの -->
+  <div class="card shadow mb-5" style="border-radius: 16px;">
+    <div class="card-body">
+      <h5 class="card-title text-danger fw-bold mb-3">
+        <i class="fas fa-info-circle me-2"></i>退会により失われるもの
+      </h5>
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="text-danger mb-3">
+            <i class="fas fa-times-circle me-2"></i>削除されるデータ
+          </h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-user text-muted me-2"></i>アカウント情報</li>
+            <li class="mb-2"><i class="fas fa-file-contract text-muted me-2"></i>作成した契約書</li>
+            <li class="mb-2"><i class="fas fa-comments text-muted me-2"></i>投稿したコメント</li>
+            <li class="mb-2"><i class="fas fa-users text-muted me-2"></i>グループメンバーシップ</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h5 class="text-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>影響を受ける機能
+          </h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-sign-in-alt text-muted me-2"></i>ログイン機能</li>
+            <li class="mb-2"><i class="fas fa-bell text-muted me-2"></i>通知機能</li>
+            <li class="mb-2"><i class="fas fa-share text-muted me-2"></i>契約書共有機能</li>
+            <li class="mb-2"><i class="fas fa-cog text-muted me-2"></i>設定変更機能</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 現在のアカウント情報 -->
+  <div class="card shadow mb-5" style="border-radius: 16px;">
+    <div class="card-body">
+      <h5 class="card-title text-primary fw-bold mb-3">
+        <i class="fas fa-user me-2"></i>現在のアカウント情報
+      </h5>
+      <div class="row">
+        <div class="col-md-6">
+          <dl class="row">
+            <dt class="col-sm-4">氏名</dt>
+            <dd class="col-sm-8"><%= @user.name %></dd>
+            <dt class="col-sm-4">メールアドレス</dt>
+            <dd class="col-sm-8"><%= @user.email %></dd>
+          </dl>
+        </div>
+        <div class="col-md-6">
+          <dl class="row">
+            <dt class="col-sm-4">所属</dt>
+            <dd class="col-sm-8"><%= @user.company&.name || '未設定' %></dd>
+            <dt class="col-sm-4">契約書数</dt>
+            <dd class="col-sm-8"><%= @user.contracts.count %>件</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 最終確認 -->
+  <div class="card shadow mb-5" style="border-radius: 16px;">
+    <div class="card-body">
+      <h5 class="card-title text-warning fw-bold mb-3">
+        <i class="fas fa-question-circle me-2"></i>最終確認
+      </h5>
+      <div class="text-center">
+        <p class="lead mb-4">
+          <strong>本当に退会しますか？</strong><br>
+          <small class="text-muted">この操作は取り消すことができません</small>
+        </p>
+
+        <%= form_with url: withdraw_user_path, method: :patch, local: true do %>
+          <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+            <%= link_to user_mypage_path, class: "btn btn-outline-secondary px-4 py-2" do %>
+              <i class="fas fa-arrow-left me-2"></i>退会しない
+            <% end %>
+            <%= submit_tag "退会する", class: "btn btn-danger px-4 py-2",
+                data: {
+                  confirm: "本当に退会しますか？\nこの操作は取り消すことができません。",
+                  disable_with: "処理中..."
+                } %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+</main>

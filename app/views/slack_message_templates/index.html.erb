@@ -1,0 +1,157 @@
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fab fa-slack me-3"></i>Slackメッセージテンプレート管理
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">Slack通知用のメッセージテンプレートを作成・管理できます</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+
+  <%# --- 新規作成ボタン --- %>
+  <div class="text-end mb-4">
+    <%= link_to new_slack_message_template_path, class: "btn btn-primary btn-lg rounded-pill px-4 shadow" do %>
+      <i class="fas fa-plus me-2"></i>新規テンプレート作成
+    <% end %>
+  </div>
+
+  <%# --- セクション区切り線 --- %>
+  <div class="section-divider"></div>
+
+  <!-- カテゴリ別テンプレート表示 -->
+  <% @categories.each do |category_key, category_name| %>
+    <div class="card mb-4 shadow-sm rounded-4 border-0">
+      <div class="card-header bg-light border-0">
+        <h5 class="mb-0 fw-bold text-primary">
+          <i class="fas fa-tag me-2"></i><%= category_name %>
+        </h5>
+      </div>
+      <div class="card-body">
+        <% category_templates = @templates.where(category: category_key) %>
+        <% if category_templates.any? %>
+          <div class="row">
+            <% category_templates.each do |template| %>
+              <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm fade-in rounded-4">
+                  <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <h6 class="card-title mb-0 fw-bold text-primary"><%= template.name %></h6>
+                      <div class="btn-group btn-group-sm">
+                        <%= link_to edit_slack_message_template_path(template), 
+                            class: "btn btn-outline-warning btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+                          <i class="fas fa-edit"></i><span>編集</span>
+                        <% end %>
+                        <%= link_to slack_message_template_path(template), 
+                            method: :delete, 
+                            data: { confirm: "このテンプレートを削除しますか？" },
+                            class: "btn btn-outline-danger btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
+                          <i class="fas fa-trash"></i><span>削除</span>
+                        <% end %>
+                      </div>
+                    </div>
+                    <p class="card-text text-muted small mb-3">
+                      <%= truncate(template.content, length: 100) %>
+                    </p>
+                    <small class="text-muted">
+                      <i class="fas fa-user me-1"></i><%= template.user ? template.user.name : '管理者' %> - 
+                      <%= template.created_at.strftime('%Y/%m/%d') %>
+                    </small>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            <%= category_name %>のテンプレートはまだ作成されていません。
+          </p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- テンプレート例 -->
+  <div class="card mb-4 shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="fas fa-lightbulb me-2"></i>テンプレート例
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="fw-bold text-primary mb-3">内容変更通知の例</h6>
+          <div class="bg-light p-3 rounded-3" style="font-size: 0.9rem;">
+            ✏️ <strong>契約書の内容が変更されました</strong><br><br>
+            【契約書名】: 〇〇株式会社との業務委託契約<br>
+            【作成者】: 田中太郎<br>
+            【ステータス】: 締結済<br>
+            【満了日】: 2024年12月31日<br>
+            【更新日】: 2024年11月30日<br>
+            【グループ】: 営業部<br>
+            【タグ】: #業務委託 #重要<br><br>
+            詳細はこちら: http://localhost:3000/contracts/123
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="fw-bold text-primary mb-3">満了通知の例</h6>
+          <div class="bg-light p-3 rounded-3" style="font-size: 0.9rem;">
+            ⚠️ <strong>契約書の満了日が近づいています</strong><br><br>
+            【契約書名】: 〇〇株式会社との業務委託契約<br>
+            【作成者】: 田中太郎<br>
+            【ステータス】: 締結済<br>
+            【満了日】: 2024年12月31日<br><br>
+            <strong>満了まで残り: 30日</strong><br>
+            詳細はこちら: http://localhost:3000/contracts/123
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 変数一覧と例 -->
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="fas fa-code me-2"></i>利用可能な変数
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="fw-bold text-primary mb-3">契約書関連の変数</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <tbody>
+                <tr><td><code>{{contract.title}}</code></td><td>契約書名</td></tr>
+                <tr><td><code>{{contract.body}}</code></td><td>契約内容</td></tr>
+                <tr><td><code>{{contract.status.name}}</code></td><td>ステータス</td></tr>
+                <tr><td><code>{{contract.conclusion_date}}</code></td><td>締結日</td></tr>
+                <tr><td><code>{{contract.expiration_date}}</code></td><td>満了日</td></tr>
+                <tr><td><code>{{contract.renewal_date}}</code></td><td>更新日</td></tr>
+                <tr><td><code>{{contract.group.name}}</code></td><td>グループ名</td></tr>
+                <tr><td><code>{{contract.tag_list}}</code></td><td>タグ一覧</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="fw-bold text-primary mb-3">ユーザー関連の変数</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <tbody>
+                <tr><td><code>{{user.name}}</code></td><td>ユーザー名</td></tr>
+                <tr><td><code>{{user.email}}</code></td><td>メールアドレス</td></tr>
+                <tr><td><code>{{days_until_expiration}}</code></td><td>満了までの日数</td></tr>
+                <tr><td><code>{{contract_url}}</code></td><td>契約書詳細URL</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main> 

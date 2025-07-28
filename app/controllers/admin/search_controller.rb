@@ -1,6 +1,5 @@
-class Admin::SearchController < ApplicationController
+class Admin::SearchController < Admin::ApplicationController
   layout "admin"
-  before_action :authenticate_admin!
 
   def index
     @search_type = params[:search_type] || "users"

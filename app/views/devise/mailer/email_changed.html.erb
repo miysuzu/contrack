@@ -1,7 +1,9 @@
-<p>Hello <%= @email %>!</p>
-
-<% if @resource.try(:unconfirmed_email?) %>
-  <p>We're contacting you to notify you that your email is being changed to <%= @resource.unconfirmed_email %>.</p>
-<% else %>
-  <p>We're contacting you to notify you that your email has been changed to <%= @resource.email %>.</p>
-<% end %>
+<div style="font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif;">
+  <h2 style="color: #009fe8; margin-bottom: 1.5em;">メールアドレス変更のお知らせ</h2>
+  <% if @resource.try(:unconfirmed_email?) %>
+    <p>メールアドレスが <%= @resource.unconfirmed_email %> に変更されました。<br>ご確認をお願いいたします。</p>
+  <% else %>
+    <p>メールアドレスが <%= @resource.email %> に変更されました。</p>
+  <% end %>
+  <p>このメールに心当たりがない場合は、サポートまでご連絡ください。</p>
+</div>

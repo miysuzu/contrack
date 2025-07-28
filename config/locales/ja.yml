@@ -6,6 +6,7 @@ ja:
       contract: "契約書"
       status: "ステータス"
       tag: "タグ"
+      slack_message_template: "Slackメッセージテンプレート"
     
     # カラム名の日本語化
     attributes:
@@ -22,11 +23,17 @@ ja:
         status: "ステータス"
         tag_list: "タグ"
         user_id: "ユーザー"
+        group: "グループ"
         created_at: "作成日時"
         updated_at: "更新日時"
       status:
         name: "ステータス名"
         color: "色"
+      slack_message_template:
+        name: "テンプレート名"
+        content: "メッセージ内容"
+        category: "カテゴリ"
+        is_default: "デフォルト設定"
     
     # バリデーションエラーメッセージの日本語化
     errors:
@@ -93,6 +100,15 @@ ja:
         separator: "."
         delimiter: ","
         format: "%u%n"
+  
+  # SlackMessageTemplateのカテゴリ
+  slack_message_template:
+    categories:
+      default: "通常"
+      created: "新規作成"
+      updated: "内容変更"
+      expiring: "満了通知"
+      renewal: "更新通知"
   
   # Deviseの日本語化
   devise:

@@ -1,0 +1,382 @@
+<!-- Heroセクション -->
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-edit me-3"></i>契約書を編集（管理者）
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">契約書の情報を編集できます</p>
+  </div>
+</section>
+
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 48px auto 0 auto; padding-left: 24px; padding-right: 24px;">
+  <div class="card shadow rounded-4 border-0">
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <!-- フォーム（左・約50%） -->
+        <div class="col-12 col-md-6">
+          <% if @contract.errors.any? %>
+            <div class="alert alert-danger">
+              <h4><%= @contract.errors.count %>件のエラーが発生しました</h4>
+              <ul>
+                <% @contract.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <%= form_with model: [:admin, @contract], local: true, multipart: true do |f| %>
+            <div class="form-group mb-3">
+              <%= f.label :user_id, "契約者", class: "form-label fw-bold" %>
+              <%= f.collection_select :user_id, 
+                  @users, 
+                  :id, :name, 
+                  { selected: @contract.user_id.nil? ? "admin_#{current_admin.id}" : @contract.user_id }, 
+                  { class: "form-control rounded-3 shadow-sm" } %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :title, "契約タイトル", class: "form-label fw-bold" %>
+              <%= f.text_field :title, class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :body, "契約内容", class: "form-label fw-bold" %>
+              <%= f.text_area :body, rows: 8, class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :status_id, "ステータス", class: "form-label fw-bold" %>
+              <%= f.collection_select :status_id, Status.all, :id, :name, {}, { class: "form-control rounded-3 shadow-sm" } %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :tag_list, "タグ（カンマ区切り）", class: "form-label fw-bold" %>
+              <%= f.text_field :tag_list, value: @contract.tag_list.join(", "), class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :group_id, "グループ", class: "form-label fw-bold" %>
+              <%= f.collection_select :group_id, @groups, :id, :name, { include_blank: "選択してください" }, { class: "form-control rounded-3 shadow-sm" } %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :admin_only, class: "form-label fw-bold" do %>
+                <%= f.check_box :admin_only, class: "form-check-input me-2" %>
+                管理者のみアクセス可能にする
+              <% end %>
+              <small class="form-text text-muted">チェックすると、この契約書は管理者のみがアクセスできます</small>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :conclusion_date, "締結日", class: "form-label fw-bold" %>
+              <%= f.date_field :conclusion_date, class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :expiration_date, "満了日", class: "form-label fw-bold" %>
+              <%= f.date_field :expiration_date, class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :renewal_date, "更新日", class: "form-label fw-bold" %>
+              <%= f.date_field :renewal_date, class: "form-control rounded-3 shadow-sm" %>
+            </div>
+
+            <div class="form-group mb-3">
+              <%= f.label :attachments, "添付ファイル", class: "form-label fw-bold" %>
+              <%= f.file_field :attachments, multiple: true, class: "form-control rounded-3 shadow-sm", id: "file-input", accept: "image/*,.pdf,.doc,.docx,.xls,.xlsx" %>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+              <%= f.submit "更新", class: "btn btn-primary px-4" %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- プレビュー（右・約50%） -->
+        <div class="col-12 col-md-6">
+          <div id="pre-upload-preview"
+               style="min-height: 500px; border: 2px dashed #b0c4de; border-radius: 12px; background: #f8fafc; padding: 1.5rem; overflow: auto;">
+            <div class="text-center text-muted py-4">
+              <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+              <p>ここに画像やPDFのプレビューが表示されます</p>
+            </div>
+
+            <% if @contract.attachments.attached? %>
+              <div>
+                <strong class="text-dark">添付ファイル</strong>
+                <div class="mt-3">
+                  <div class="row">
+                    <% @contract.attachments.each do |attachment| %>
+                      <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+                          <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                              <i class="fas fa-paperclip me-2 text-muted"></i>
+                              <small class="text-muted flex-grow-1"><%= attachment.filename %></small>
+                              <small class="text-muted">(<%= number_to_human_size(attachment.byte_size) %>)</small>
+                            </div>
+
+                            <% if attachment.content_type.start_with?('image/') %>
+                              <!-- 画像プレビュー -->
+                              <div class="text-center mb-2">
+                                <img src="<%= rails_blob_url(attachment) %>" 
+                                     class="img-fluid rounded" 
+                                     style="max-height: 200px; max-width: 100%; object-fit: cover; cursor: pointer;"
+                                     onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')"
+                                     alt="<%= attachment.filename %>">
+                              </div>
+                            <% elsif attachment.content_type.start_with?('application/pdf') %>
+                              <!-- PDFプレビュー -->
+                              <div class="text-center mb-2">
+                                <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                  <i class="fas fa-file-pdf text-danger fa-3x"></i>
+                                </div>
+                              </div>
+                            <% else %>
+                              <!-- その他のファイル -->
+                              <div class="text-center mb-2">
+                                <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                  <i class="fas fa-file text-secondary fa-3x"></i>
+                                </div>
+                              </div>
+                            <% end %>
+
+                            <!-- ボタン -->
+                            <div class="d-flex gap-2 flex-nowrap justify-content-between mt-2">
+                              <%= link_to rails_blob_path(attachment, disposition: "attachment"), 
+                                  class: "btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap" do %>
+                                <i class="fas fa-download"></i><span>ダウンロード</span>
+                              <% end %>
+
+                              <% if attachment.content_type.start_with?('image/') %>
+                                <button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap"
+                                        onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')">
+                                  <i class="fas fa-eye"></i><span>プレビュー</span>
+                                </button>
+                              <% end %>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 画像モーダル -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="modalImage" src="" alt="" class="img-fluid">
+      </div>
+      <div class="modal-footer">
+        <a id="downloadLink" href="" download="" class="btn btn-primary">
+          <i class="fas fa-download me-2"></i>ダウンロード
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* モーダルを画面中央に配置 */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+@media (min-width: 576px) {
+  .modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+  }
+}
+
+/* モーダルの背景を暗くして中央に集中 */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* モーダルコンテンツの最大高さを制限 */
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-body img {
+  max-height: 60vh;
+  object-fit: contain;
+}
+</style>
+
+<script>
+// ファイルプレビュー機能
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.getElementById('file-input');
+  const previewContainer = document.getElementById('pre-upload-preview');
+  
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      const files = e.target.files;
+      
+      if (files.length > 0) {
+        // 既存のプレビューをクリア
+        previewContainer.innerHTML = '';
+        
+        // 新しいプレビューを作成
+        const previewTitle = document.createElement('div');
+        previewTitle.innerHTML = '<strong class="text-dark">選択されたファイル</strong>';
+        previewContainer.appendChild(previewTitle);
+        
+        const previewRow = document.createElement('div');
+        previewRow.className = 'row mt-3';
+        
+        Array.from(files).forEach((file, index) => {
+          const previewCol = document.createElement('div');
+          previewCol.className = 'col-md-6 col-lg-4 mb-3';
+          
+          const previewCard = document.createElement('div');
+          previewCard.className = 'card h-100 border-0 shadow-sm';
+          previewCard.style.minWidth = '300px';
+          
+          const cardBody = document.createElement('div');
+          cardBody.className = 'card-body p-3';
+          
+          // ファイル情報
+          const fileInfo = document.createElement('div');
+          fileInfo.className = 'd-flex align-items-center mb-2';
+          fileInfo.innerHTML = `
+            <i class="fas fa-paperclip me-2 text-muted"></i>
+            <small class="text-muted flex-grow-1">${file.name}</small>
+            <small class="text-muted">(${formatFileSize(file.size)})</small>
+          `;
+          cardBody.appendChild(fileInfo);
+          
+          // プレビュー表示
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'text-center mb-2';
+          
+          if (file.type.startsWith('image/')) {
+            // 画像プレビュー
+            const img = document.createElement('img');
+            img.className = 'img-fluid rounded';
+            img.style.maxHeight = '200px';
+            img.style.maxWidth = '100%';
+            img.style.objectFit = 'cover';
+            img.style.cursor = 'pointer';
+            img.alt = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            img.onclick = function() {
+              openImageModal(e.target.result, file.name);
+            };
+            
+            previewDiv.appendChild(img);
+          } else if (file.type === 'application/pdf') {
+            // PDFプレビュー
+            previewDiv.innerHTML = `
+              <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-file-pdf text-danger fa-3x"></i>
+              </div>
+            `;
+          } else {
+            // その他のファイル
+            previewDiv.innerHTML = `
+              <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-file text-secondary fa-3x"></i>
+              </div>
+            `;
+          }
+          
+          cardBody.appendChild(previewDiv);
+          
+          // プレビューボタン（画像の場合）
+          if (file.type.startsWith('image/')) {
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'd-flex gap-2 flex-nowrap justify-content-between mt-2';
+            buttonDiv.innerHTML = `
+              <button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap"
+                      onclick="openImageModal('${URL.createObjectURL(file)}', '${file.name}')">
+                <i class="fas fa-eye"></i><span>プレビュー</span>
+              </button>
+            `;
+            cardBody.appendChild(buttonDiv);
+          }
+          
+          previewCard.appendChild(cardBody);
+          previewCol.appendChild(previewCard);
+          previewRow.appendChild(previewCol);
+        });
+        
+        previewContainer.appendChild(previewRow);
+      } else {
+        // ファイルが選択されていない場合
+        previewContainer.innerHTML = `
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+            <p>ここに画像やPDFのプレビューが表示されます</p>
+          </div>
+        `;
+      }
+    });
+  }
+});
+
+// ファイルサイズをフォーマットする関数
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// 画像モーダルを開く関数
+function openImageModal(imageUrl, filename) {
+  const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('imageModalLabel');
+  const downloadLink = document.getElementById('downloadLink');
+  
+  modalImage.src = imageUrl;
+  modalImage.alt = filename;
+  modalTitle.textContent = filename;
+  downloadLink.href = imageUrl;
+  downloadLink.download = filename;
+  
+  modal.show();
+}
+</script>
+
+<div class="mt-5 text-center">
+  <%= link_to admin_contract_path(@contract), 
+      method: :delete, 
+      data: { confirm: "この契約書を削除しますか？\nこの操作は取り消せません。" },
+      class: "btn btn-danger px-4 rounded-pill shadow-sm" do %>
+    <i class="fas fa-trash me-2"></i>削除
+  <% end %>
+  <%= link_to admin_contracts_path, class: "btn btn-secondary px-4 ms-2 rounded-pill shadow-sm" do %>
+    <i class="fas fa-arrow-left me-2"></i>一覧へ戻る
+  <% end %>
+</div> 

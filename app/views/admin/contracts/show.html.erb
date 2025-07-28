@@ -1,41 +1,344 @@
-<div class="container fade-in" style="max-width: 700px;">
-  <h2 class="display-6 fw-bold mb-4 p-3 text-center" style="background: #e0f7fa; color: #009fe8; border-radius: 8px;">
-    <%= @contract.title %>
-  </h2>
+<!-- Heroセクション -->
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url('<%= asset_path('background_wave.png') %>') center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h1 class="display-4 fw-bold" style="text-shadow: 0 2px 8px #0008;">契約書詳細（管理者）</h1>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">契約書の詳細情報を確認できます</p>
+  </div>
+</section>
 
-  <div class="mb-3 px-3">
-    <p class="mb-2"><strong>投稿ユーザー：</strong> <%= @contract.user.name %></p>
-    <p class="mb-2"><strong>ステータス：</strong>
+<!-- タイトルセクション -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 32px auto 0 auto; padding-left: 24px; padding-right: 24px;">
+  <div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary mb-3">
+      <%= @contract.title %>
+      <% if @contract.admin_only? %>
+        <span class="badge bg-danger ms-3" style="font-size: 1rem;">
+          <i class="fas fa-user-shield me-1"></i>管理者専用
+        </span>
+      <% end %>
+    </h2>
+    <div class="mb-4">
       <% case @contract.status.name
          when "下書き" %>
-        <span class="badge bg-light text-dark"><%= @contract.status.name %></span>
+        <span class="badge bg-light text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
       <% when "送信済" %>
-        <span class="badge bg-warning text-dark"><%= @contract.status.name %></span>
+        <span class="badge bg-warning text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
       <% when "締結済" %>
-        <span class="badge bg-success"><%= @contract.status.name %></span>
+        <span class="badge bg-success fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
       <% else %>
-        <span class="badge bg-secondary text-dark"><%= @contract.status.name %></span>
+        <span class="badge bg-secondary text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
       <% end %>
-    </p>
-    <p class="mb-2"><strong>タグ：</strong>
-      <% if @contract.tags.any? %>
-        <% @contract.tags.each do |tag| %>
-          <span class="badge bg-info text-dark me-1"><%= tag.name %></span>
-        <% end %>
-      <% else %>
-        <span class="text-muted">なし</span>
-      <% end %>
-    </p>
-  </div>
-
-  <hr>
-
-  <div class="mb-5 px-3">
-    <p class="mb-1"><strong>契約内容：</strong></p>
-    <p class="fs-5" style="white-space: pre-line;"><%= simple_format(@contract.body) %></p>
-  </div>
-
-  <div class="mt-4 text-center">
-    <%= link_to "一覧に戻る", admin_contracts_path, class: "btn btn-secondary px-4" %>
+    </div>
   </div>
 </div>
+
+<!-- コンテンツ本体 -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
+
+  <!-- 契約情報カード -->
+  <div class="card mb-4 shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fas fa-info-circle me-2"></i>契約情報
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      <!-- 投稿ユーザー -->
+      <div class="mb-4">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-user me-3 text-primary fa-lg"></i>
+          <div>
+            <strong class="text-dark">投稿ユーザー</strong><br>
+            <span class="text-primary fw-bold">
+              <% if @contract.user %>
+                <%= @contract.user.name %>
+              <% else %>
+                管理者作成
+              <% end %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-calendar-alt me-3 text-info fa-lg"></i>
+            <div>
+              <strong class="text-dark">作成日</strong><br>
+              <%= @contract.created_at.strftime('%Y年%m月%d日 %H:%M') %>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-handshake me-3 text-success fa-lg"></i>
+            <div>
+              <strong class="text-dark">契約締結日</strong><br>
+              <%= @contract.conclusion_date.present? ? @contract.conclusion_date.strftime('%Y年%m月%d日') : '未設定' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-calendar-times me-3 text-danger fa-lg"></i>
+            <div>
+              <strong class="text-dark">満了日</strong><br>
+              <span class="<%= 'text-danger fw-bold' if @contract.expiration_date.present? && @contract.expiration_date <= Date.today + 30 %>">
+                <%= @contract.expiration_date.present? ? @contract.expiration_date.strftime('%Y年%m月%d日') : '未設定' %>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-calendar-plus me-3 text-primary fa-lg"></i>
+            <div>
+              <strong class="text-dark">更新日</strong><br>
+              <%= @contract.renewal_date.present? ? @contract.renewal_date.strftime('%Y年%m月%d日') : '未設定' %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% if @contract.tags.any? %>
+        <div class="mb-4">
+          <strong class="text-dark">タグ</strong>
+          <div class="mt-2">
+            <% @contract.tags.each do |tag| %>
+              <%= link_to tag.name, admin_contracts_path(tag: tag.name), class: "badge bg-info text-dark me-2 px-3 py-2 rounded-pill" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @contract.attachments.attached? %>
+        <div>
+          <strong class="text-dark">添付ファイル</strong>
+          <div class="mt-3">
+            <div class="row">
+              <% @contract.attachments.each do |attachment| %>
+                <div class="col-md-6 col-lg-4 mb-3">
+                  <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-3">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-paperclip me-2 text-muted"></i>
+                        <small class="text-muted flex-grow-1"><%= attachment.filename %></small>
+                        <small class="text-muted">(<%= number_to_human_size(attachment.byte_size) %>)</small>
+                      </div>
+                      
+                      <% if attachment.content_type.start_with?('image/') %>
+                        <!-- 画像プレビュー -->
+                        <div class="text-center mb-2">
+                          <img src="<%= rails_blob_url(attachment) %>" 
+                               class="img-fluid rounded" 
+                               style="max-height: 200px; max-width: 100%; object-fit: cover; cursor: pointer;"
+                               onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')"
+                               alt="<%= attachment.filename %>">
+                        </div>
+                      <% elsif attachment.content_type.start_with?('application/pdf') %>
+                        <!-- PDFプレビュー -->
+                        <div class="text-center mb-2">
+                          <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-file-pdf text-danger fa-3x"></i>
+                          </div>
+                        </div>
+                      <% else %>
+                        <!-- その他のファイル -->
+                        <div class="text-center mb-2">
+                          <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-file text-secondary fa-3x"></i>
+                          </div>
+                        </div>
+                      <% end %>
+                      
+                      <div class="d-flex gap-2">
+                        <%= link_to rails_blob_path(attachment, disposition: "attachment"), 
+                            class: "btn btn-outline-primary btn-sm flex-grow-1" do %>
+                          <i class="fas fa-download me-1"></i>ダウンロード
+                        <% end %>
+                        <% if attachment.content_type.start_with?('image/') %>
+                          <button class="btn btn-outline-secondary btn-sm" 
+                                  onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')">
+                            <i class="fas fa-eye me-1"></i>プレビュー
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 契約内容カード -->
+  <div class="card mb-4 shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fas fa-file-contract me-2"></i>契約内容
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      <div class="contract-content" style="white-space: pre-line; line-height: 1.6;">
+        <%= simple_format(@contract.body) %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 内部メモカード -->
+  <div class="card mb-4 shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fas fa-sticky-note me-2"></i>内部メモ
+      </h5>
+    </div>
+    <div class="card-body p-4">
+      <div class="mb-4">
+        <%= form_with model: [@contract, Comment.new], 
+                      url: admin_contract_comments_path(@contract), 
+                      local: true do |f| %>
+          <div class="mb-3">
+            <%= f.text_area :content, class: "form-control rounded-3 shadow-sm", rows: 3, placeholder: "メモを入力してください..." %>
+          </div>
+          <%= f.submit "メモを追加", class: "btn btn-primary rounded-pill shadow-sm px-4" %>
+        <% end %>
+      </div>
+      <div class="comments-list">
+        <% @contract.comments.top_level.ordered.each do |comment| %>
+          <%= render 'admin/comments/comment', comment: comment, contract: @contract %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slackメッセージ生成カード -->
+  <div class="card mb-4 shadow-sm rounded-4 border-0">
+    <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 text-primary fw-bold">
+        <i class="fab fa-slack me-2"></i>Slackメッセージ生成
+      </h5>
+      <%= link_to admin_slack_message_templates_path, class: "btn btn-outline-primary btn-sm rounded-pill shadow-sm" do %>
+        <i class="fas fa-cog me-1"></i>テンプレート管理
+      <% end %>
+    </div>
+    <div class="card-body p-4">
+      <div class="mb-4">
+        <p class="text-muted">
+          メッセージタイプを選択して、生成されたメッセージをコピーしてSlackに貼り付けてください。新規作成、更新、満了通知など、状況に応じた適切なメッセージを自動生成します。
+        </p>
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">メッセージタイプ:</label>
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="message_type" id="type_default" value="default" checked>
+          <label class="btn btn-outline-primary rounded-pill" for="type_default">通常</label>
+          <input type="radio" class="btn-check" name="message_type" id="type_created" value="created">
+          <label class="btn btn-outline-success rounded-pill" for="type_created">新規作成</label>
+          <input type="radio" class="btn-check" name="message_type" id="type_updated" value="updated">
+          <label class="btn btn-outline-warning rounded-pill" for="type_updated">内容変更</label>
+          <input type="radio" class="btn-check" name="message_type" id="type_expiring" value="expiring">
+          <label class="btn btn-outline-danger rounded-pill" for="type_expiring">満了通知</label>
+          <input type="radio" class="btn-check" name="message_type" id="type_renewal" value="renewal">
+          <label class="btn btn-outline-info rounded-pill" for="type_renewal">更新通知</label>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">生成されたメッセージ:</label>
+        <div class="position-relative">
+          <textarea id="slack_message"
+                    class="form-control rounded-3 shadow-sm"
+                    rows="8"
+                    readonly
+                    style="min-height: 180px; resize: none;"><%= generate_slack_message_for_contract(@contract) %></textarea>
+          <button id="copy_button"
+                  type="button"
+                  class="btn btn-primary position-absolute top-0 end-0 m-2 rounded-pill shadow-sm"
+                  onclick="copyToClipboard()">
+            <i id="copy_icon" class="fas fa-copy me-1"></i>
+            <span id="copy_label">コピー</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- アクションボタン -->
+  <div class="d-flex gap-3 justify-content-center my-5">
+    <%= link_to edit_admin_contract_path(@contract), class: "btn btn-warning px-4 rounded-pill shadow-sm" do %>
+      <i class="fas fa-edit me-2"></i>編集
+    <% end %>
+    <%= link_to admin_contract_path(@contract),
+        method: :delete,
+        data: { confirm: "この契約書を削除しますか？\nこの操作は取り消せません。" },
+        class: "btn btn-danger px-4 rounded-pill shadow-sm" do %>
+      <i class="fas fa-trash me-2"></i>削除
+    <% end %>
+    <%= link_to admin_contracts_path, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+      <i class="fas fa-arrow-left me-2"></i>一覧に戻る
+    <% end %>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('input[name="message_type"]').forEach(function(radio) {
+    radio.addEventListener('change', function () {
+      const type = this.value;
+      updateSlackMessage(type);
+    });
+  });
+
+  function updateSlackMessage(type) {
+    const contractId = <%= @contract.id %>;
+    fetch(`/admin/contracts/${contractId}/slack_message?type=${type}`)
+      .then(response => response.text())
+      .then(message => {
+        document.getElementById('slack_message').value = message;
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function copyToClipboard() {
+    const textarea = document.getElementById('slack_message');
+    const button = document.getElementById('copy_button');
+    const icon = document.getElementById('copy_icon');
+    const label = document.getElementById('copy_label');
+
+    textarea.select();
+    document.execCommand('copy');
+
+    icon.className = 'fas fa-check me-1';
+    label.textContent = 'コピー完了';
+    button.classList.remove('btn-primary');
+    button.classList.add('btn-success');
+
+    setTimeout(() => {
+      icon.className = 'fas fa-copy me-1';
+      label.textContent = 'コピー';
+      button.classList.remove('btn-success');
+      button.classList.add('btn-primary');
+    }, 2000);
+  }
+
+  function openImageModal(imageUrl, filename) {
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('imageModalLabel');
+    const downloadLink = document.getElementById('downloadLink');
+
+    modalImage.src = imageUrl;
+    modalImage.alt = filename;
+    modalTitle.textContent = filename;
+    downloadLink.href = imageUrl;
+    downloadLink.download = filename;
+
+    modal.show();
+  }
+</script>

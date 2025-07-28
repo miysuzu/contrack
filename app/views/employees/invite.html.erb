@@ -1,0 +1,22 @@
+<div class="container my-4" style="max-width: 400px;">
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <h2 class="text-center mb-4 text-primary">従業員招待</h2>
+      <%= form_with url: create_invite_employees_path, method: :post, local: true do |f| %>
+        <div class="mb-3">
+          <%= label_tag :email, "従業員のメールアドレス", class: "form-label" %>
+          <%= email_field_tag :email, nil, class: "form-control", required: true %>
+        </div>
+        <div class="d-grid">
+          <%= submit_tag "招待する", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+<% if flash[:invite_email_preview] %>
+  <div class="alert alert-info mt-4">
+    <h5>送信されるメール内容（プレビュー）</h5>
+    <pre><%= flash[:invite_email_preview] %></pre>
+  </div>
+<% end %>

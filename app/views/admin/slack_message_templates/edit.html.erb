@@ -1,0 +1,19 @@
+<!-- Heroセクション -->
+<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-edit me-3"></i>テンプレート編集
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">Slack通知用のメッセージテンプレートを編集します</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1000px; min-height: calc(100vh - 900px);">
+
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body p-4">
+      <%= render 'form', template: @template %>
+    </div>
+  </div>
+
+</main> 

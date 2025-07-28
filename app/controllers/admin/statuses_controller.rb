@@ -1,6 +1,5 @@
-class Admin::StatusesController < ApplicationController
+class Admin::StatusesController < Admin::ApplicationController
   layout 'admin'
-  before_action :authenticate_admin!
 
   def index
     @statuses = Status.all.order(:id)

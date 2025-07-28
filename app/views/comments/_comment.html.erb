@@ -1,0 +1,92 @@
+<%# コメントが0件のとき %>
+<% if comment.nil? %>
+  <div class="text-center py-5">
+    <%= image_tag 'empty_comments.png', alt: 'コメントがありません', class: 'img-fluid', style: 'max-width: 180px;' %>
+    <p class="text-muted mt-3">コメントはまだありません。</p>
+  </div>
+<% else %>
+  <div class="comment-item mb-3" id="comment-<%= comment.id %>">
+    <div class="card shadow-sm" style="margin-left: <%= comment.depth * 20 %>px; border-radius: 12px;">
+      <div class="card-body">
+        <!-- コメントヘッダー -->
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center">
+            <small class="text-muted">
+              <i class="fas fa-user me-1"></i>
+              <%= comment.author_name %> - <%= comment.created_at.strftime("%Y/%m/%d %H:%M") %>
+            </small>
+            <% if comment.reply? %>
+              <small class="text-muted ms-2">
+                <i class="fas fa-reply me-1"></i>返信
+              </small>
+            <% end %>
+          </div>
+          <% if comment.commentable == current_user || contract.user == current_user %>
+            <div class="btn-group btn-group-sm">
+              <%= link_to "編集", edit_contract_comment_path(contract, comment), 
+                  class: "btn btn-outline-secondary btn-sm" %>
+              <%= link_to "削除", contract_comment_path(contract, comment), 
+                  method: :delete, 
+                  data: { confirm: "このメモを削除しますか？" },
+                  class: "btn btn-outline-danger btn-sm" %>
+            </div>
+          <% end %>
+        </div>
+        <!-- コメント内容 -->
+        <div class="comment-content mb-3">
+          <%= simple_format(comment.content) %>
+        </div>
+        <!-- 返信ボタン -->
+        <% if comment.can_reply? %>
+          <div class="mb-2">
+            <button class="btn btn-outline-primary btn-sm" 
+                    onclick="toggleReplyForm('<%= comment.id %>')">
+              <i class="fas fa-reply me-1"></i>返信
+            </button>
+          </div>
+        <% end %>
+        <!-- 返信フォーム（初期状態は非表示） -->
+        <div id="reply-form-<%= comment.id %>" class="reply-form" style="display: none;">
+          <%= form_with model: [contract, Comment.new], 
+                        url: reply_contract_comment_path(contract, comment), 
+                        method: :post, 
+                        local: true do |f| %>
+            <div class="mb-2">
+              <%= f.text_area :content, 
+                  class: "form-control", 
+                  rows: 2, 
+                  placeholder: "返信を入力してください..." %>
+            </div>
+            <div class="d-flex gap-2">
+              <%= f.submit "返信を送信", class: "btn btn-primary btn-sm" %>
+              <button type="button" class="btn btn-secondary btn-sm" 
+                      onclick="toggleReplyForm('<%= comment.id %>')">
+                キャンセル
+              </button>
+            </div>
+          <% end %>
+        </div>
+        <!-- 返信一覧 -->
+        <% if comment.replies.any? %>
+          <div class="replies mt-3">
+            <% comment.replies.ordered.each do |reply| %>
+              <%= render 'comments/comment', comment: reply, contract: contract %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<script>
+function toggleReplyForm(commentId) {
+  const form = document.getElementById(`reply-form-${commentId}`);
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    form.querySelector('textarea').focus();
+  } else {
+    form.style.display = 'none';
+  }
+}
+</script> 

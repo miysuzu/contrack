@@ -1,0 +1,2 @@
+module GroupJoinRequestsHelper
+end

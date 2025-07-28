@@ -3,11 +3,37 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
-      /* Email styles need to be inline */
+      body {
+        background: #f4f8fb;
+        font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .mail-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px #0001;
+        padding: 32px 24px;
+      }
+      .mail-footer {
+        color: #999;
+        font-size: 0.95em;
+        text-align: center;
+        margin-top: 32px;
+      }
     </style>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="mail-container">
+      <%= yield %>
+      <div class="mail-footer">
+        <hr style="margin: 32px 0 16px 0;">
+        <div>Contrack（契約管理システム）</div>
+        <div style="font-size: 0.9em;">本メールは自動送信です。ご返信は不要です。</div>
+      </div>
+    </div>
   </body>
 </html>

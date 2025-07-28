@@ -1,0 +1,15 @@
+<!-- Heroセクション -->
+<section class="hero-section bg-dashboard">
+  <div class="container pt-5 text-center text-white">
+    <h2 class="display-3 fw-bold">
+      <i class="fas fa-users me-3"></i>新規グループ作成
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">新しいグループを作成して契約書を管理しましょう</p>
+  </div>
+</section>
+
+<main class="container my-5" style="max-width: 1200px; min-height: calc(100vh - 900px);">
+  
+  <%= render 'form', group: @group %>
+
+</main>

@@ -1,0 +1,103 @@
+<!-- Heroセクション -->
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url('<%= asset_path('background_wave.png') %>') center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h1 class="display-4 fw-bold" style="text-shadow: 0 2px 8px #0008;">グループ詳細</h1>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">グループの詳細情報を確認できます</p>
+  </div>
+</section>
+
+<!-- タイトルセクション -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 32px auto 0 auto; padding-left: 24px; padding-right: 24px;">
+  <div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary mb-3"><%= @group.name %></h2>
+  </div>
+</div>
+
+<!-- コンテンツ本体 -->
+<div class="custom-wide-container fade-in" style="width: 100%; max-width: 1500px; margin: 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <%# --- グループ情報カード --- %>
+      <div class="card mb-4 shadow-sm rounded-4 border-0">
+        <div class="card-header bg-light border-0">
+          <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-info-circle me-2"></i>グループ情報
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-hashtag me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">ID</strong><br>
+                  <span class="text-muted"><%= @group.id %></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-users me-3 text-primary fa-lg"></i>
+                <div>
+                  <strong class="text-dark">グループ名</strong><br>
+                  <span class="text-muted"><%= @group.name %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-4">
+            <div class="d-flex align-items-start">
+              <i class="fas fa-file-alt me-3 text-primary fa-lg mt-1"></i>
+              <div>
+                <strong class="text-dark">説明文</strong><br>
+                <span class="text-muted"><%= @group.description.presence || '（未設定）' %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# --- メンバー一覧カード --- %>
+      <div class="card mb-4 shadow-sm rounded-4 border-0">
+        <div class="card-header bg-light border-0">
+          <h5 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-users me-2"></i>メンバー一覧
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <% @group.users.each do |user| %>
+              <li class="list-group-item d-flex align-items-center py-3 px-4">
+                <i class="fas fa-user me-3 text-primary"></i>
+                <div>
+                  <strong class="text-dark"><%= user.name %></strong><br>
+                  <small class="text-muted"><%= user.email %></small>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+
+      <%# --- アクションボタン --- %>
+      <div class="d-flex gap-3 justify-content-center my-5">
+        <% if @group.users.include?(current_user) %>
+          <%= link_to edit_group_path(@group), class: "btn btn-warning px-4 rounded-pill shadow-sm" do %>
+            <i class="fas fa-edit me-2"></i>編集
+          <% end %>
+          <%= link_to group_path(@group), method: :delete, data: { confirm: '本当に削除しますか？' }, class: "btn btn-danger px-4 rounded-pill shadow-sm" do %>
+            <i class="fas fa-trash me-2"></i>削除
+          <% end %>
+          <%= button_to leave_group_path(@group), method: :post, data: { confirm: '本当にこのグループから脱退しますか？' }, class: "btn btn-outline-warning px-4 rounded-pill shadow-sm" do %>
+            <i class="fas fa-sign-out-alt me-2"></i>グループ脱退
+          <% end %>
+        <% end %>
+        <%= link_to group_searches_path, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+          <i class="fas fa-arrow-left me-2"></i>一覧へ戻る
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+</div>

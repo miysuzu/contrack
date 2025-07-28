@@ -1,24 +1,43 @@
-<div class="container fade-in" style="max-width: 400px; margin: 60px auto;">
-  <div class="card shadow-sm">
-    <div class="card-body p-4">
-      <h2 class="text-center mb-4" style="color: #009fe8;">パスワードを忘れた場合</h2>
+<%# --- Hero背景 + フォーム（フッター込みで100vh） --- %>
+<div style="
+  position: relative;
+  background: url('<%= asset_path("login_hero_bg.png") %>') left top / cover no-repeat;
+  background-size: cover;
+  min-height: calc(100vh - 200px);
+  padding-top: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+">
 
-      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-        <%= render "devise/shared/error_messages", resource: resource %>
+  <%# --- パスワード再設定フォーム --- %>
+  <div style="
+    position: relative;
+    right: 10%;
+    width: 400px;
+  ">
+    <div class="card shadow-sm" style="border-radius: 16px; background-color: #f8f9fa;">
+      <div class="card-body p-4">
+        <h2 class="text-center fw-bold text-primary mb-4">パスワードを忘れた場合</h2>
 
-        <div class="mb-3">
-          <%= f.label :email, "メールアドレス", class: "form-label" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+        <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <%= render "devise/shared/error_messages", resource: resource %>
+
+          <div class="mb-3">
+            <%= f.label :email, "メールアドレス", class: "form-label fw-bold" %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control rounded-3 shadow-sm" %>
+          </div>
+
+          <div class="d-grid">
+            <%= f.submit "パスワードリセットメールを送信", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+
+        <div class="mt-3 text-center">
+          <%= render "devise/shared/links" %>
         </div>
-
-        <div class="d-grid">
-          <%= f.submit "パスワードリセットメールを送信", class: "btn btn-primary" %>
-        </div>
-      <% end %>
-
-      <div class="mt-3 text-center">
-        <%= render "devise/shared/links" %>
       </div>
     </div>
   </div>
