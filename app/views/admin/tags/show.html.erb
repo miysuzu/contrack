@@ -1,7 +1,7 @@
 <!-- Heroセクション -->
-<section class="hero-section" style="background: linear-gradient(135deg, #009fe8 0%, #0066cc 100%);">
-  <div class="container pt-5 text-center text-white">
-    <h2 class="display-3 fw-bold">
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_admin.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h2 class="display-3 fw-bold" style="text-shadow: 0 2px 8px #0008;">
       <i class="fas fa-tag me-3"></i>タグ詳細
     </h2>
     <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">タグの詳細情報と関連契約書を確認できます</p>
@@ -79,23 +79,22 @@
                         <% end %>
                       </td>
                       <td>
-                        <% case contract.status.name
-                           when "下書き" %>
-                          <span class="badge bg-light text-dark rounded-pill">
-                            <i class="fas fa-edit me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "送信済" %>
-                          <span class="badge bg-warning text-dark rounded-pill">
-                            <i class="fas fa-paper-plane me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "締結済" %>
-                          <span class="badge bg-success rounded-pill">
-                            <i class="fas fa-check-circle me-1"></i><%= contract.status.name %>
-                          </span>
+                        <% if contract.status&.name == "下書き" %>
+                          <span class="badge bg-light status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "承認待ち" %>
+                          <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "確認中" %>
+                          <span class="badge bg-info status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "締結済" %>
+                          <span class="badge bg-success status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "アーカイブ済" %>
+                          <span class="badge bg-secondary status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "差し戻し" %>
+                          <span class="badge bg-danger status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "保留" %>
+                          <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
                         <% else %>
-                          <span class="badge bg-secondary text-dark rounded-pill">
-                            <i class="fas fa-circle me-1"></i><%= contract.status.name %>
-                          </span>
+                          <span class="badge bg-secondary status-badge"><%= contract.status&.name || "未設定" %></span>
                         <% end %>
                       </td>
                       <td>

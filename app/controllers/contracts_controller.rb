@@ -110,7 +110,7 @@ class ContractsController < ApplicationController
       else
         @contract.shared_user_ids = []
       end
-      redirect_to @contract, notice: "契約書を更新しました。"
+      redirect_to contract_path(@contract), notice: "契約書を更新しました。"
     else
       @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
       render :edit

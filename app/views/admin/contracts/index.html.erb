@@ -1,7 +1,7 @@
 <!-- Heroセクション -->
-<section class="hero-section bg-contracts">
-  <div class="container pt-5 text-center text-white">
-    <h2 class="display-3 fw-bold">全契約書一覧</h2>
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_admin.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h2 class="display-3 fw-bold" style="text-shadow: 0 2px 8px #0008;">全契約書一覧</h2>
     <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">グループごとの契約を確認・管理できます</p>
   </div>
 </section>
@@ -55,27 +55,35 @@
       <!-- タグフィルタ -->
       <div class="mt-4">
         <div class="mb-2 fw-semibold">タグで絞り込む：</div>
-        <% ActsAsTaggableOn::Tag.all.each do |tag| %>
-          <%= link_to tag.name, admin_contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort]), 
-              class: "badge rounded-pill bg-info text-dark me-2 px-3 py-2 text-decoration-none" %>
-        <% end %>
+        <div class="d-flex flex-wrap gap-2">
+          <% ActsAsTaggableOn::Tag.all.each do |tag| %>
+            <%= link_to admin_contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort]), 
+                class: "btn btn-outline-info rounded-pill px-3 py-2 fw-semibold transition-all shadow-sm" do %>
+              <i class="fas fa-tag me-2"></i><%= tag.name %>
+            <% end %>
+          <% end %>
+        </div>
       </div>
 
       <!-- ステータスフィルタ -->
       <div class="row mt-4 align-items-center">
         <div class="col-md-3 fw-semibold">ステータスで絞り込み：</div>
         <div class="col-md-6">
-          <div class="btn-group flex-wrap" role="group">
-            <%= link_to "すべて", admin_contracts_path(keyword: params[:keyword], sort: params[:sort]), 
-                class: "btn btn-outline-secondary #{'active' unless params[:status_id].present?}" %>
+          <div class="d-flex flex-wrap gap-2">
+            <%= link_to admin_contracts_path(keyword: params[:keyword], sort: params[:sort]), 
+                class: "btn #{params[:status_id].blank? ? 'btn-primary shadow-sm' : 'btn-outline-primary'} rounded-pill px-4 py-2 fw-semibold transition-all" do %>
+              <i class="fas fa-list me-2"></i>すべて
+            <% end %>
             <% Status.all.each do |status| %>
-              <%= link_to status.name, admin_contracts_path(status_id: status.id, keyword: params[:keyword], sort: params[:sort]), 
-                  class: "btn btn-outline-secondary #{'active' if params[:status_id].to_i == status.id}" %>
+              <%= link_to admin_contracts_path(status_id: status.id, keyword: params[:keyword], sort: params[:sort]), 
+                  class: "btn #{params[:status_id].to_i == status.id ? 'btn-primary shadow-sm' : 'btn-outline-primary'} rounded-pill px-4 py-2 fw-semibold transition-all" do %>
+                <i class="fas fa-circle me-2"></i><%= status.name %>
+              <% end %>
             <% end %>
           </div>
         </div>
         <div class="col-md-3 text-end">
-          <span class="badge bg-secondary fs-6">全<%= @contracts.count %>件</span>
+          <span class="badge bg-primary fs-6 rounded-pill px-3 py-2 shadow-sm">全<%= @contracts.count %>件</span>
         </div>
       </div>
 
@@ -84,12 +92,16 @@
         <div class="row mt-4 align-items-center">
           <div class="col-md-3 fw-semibold">グループで絞り込み：</div>
           <div class="col-md-6">
-            <div class="btn-group flex-wrap" role="group">
-              <%= link_to "すべて", admin_contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-                  class: "btn btn-outline-secondary #{'active' unless params[:group_id].present?}" %>
+            <div class="d-flex flex-wrap gap-2">
+              <%= link_to admin_contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+                  class: "btn #{params[:group_id].blank? ? 'btn-success shadow-sm' : 'btn-outline-success'} rounded-pill px-4 py-2 fw-semibold transition-all" do %>
+                <i class="fas fa-users me-2"></i>すべて
+              <% end %>
               <% Group.where(company_id: current_admin.company_id).order(:name).each do |group| %>
-                <%= link_to group.name, admin_contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-                    class: "btn btn-outline-secondary #{'active' if params[:group_id].to_i == group.id}" %>
+                <%= link_to admin_contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
+                    class: "btn #{params[:group_id].to_i == group.id ? 'btn-success shadow-sm' : 'btn-outline-success'} rounded-pill px-4 py-2 fw-semibold transition-all" do %>
+                  <i class="fas fa-building me-2"></i><%= group.name %>
+                <% end %>
               <% end %>
             </div>
           </div>
@@ -180,23 +192,22 @@
                         </div>
                       </td>
                       <td>
-                        <% case contract.status.name
-                           when "下書き" %>
-                          <span class="badge bg-light text-dark rounded-pill">
-                            <i class="fas fa-edit me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "送信済" %>
-                          <span class="badge bg-warning text-dark rounded-pill">
-                            <i class="fas fa-paper-plane me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "締結済" %>
-                          <span class="badge bg-success rounded-pill">
-                            <i class="fas fa-check-circle me-1"></i><%= contract.status.name %>
-                          </span>
+                        <% if contract.status&.name == "下書き" %>
+                          <span class="badge bg-light status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "承認待ち" %>
+                          <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "確認中" %>
+                          <span class="badge bg-info status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "締結済" %>
+                          <span class="badge bg-success status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "アーカイブ済" %>
+                          <span class="badge bg-secondary status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "差し戻し" %>
+                          <span class="badge bg-danger status-badge"><%= contract.status.name %></span>
+                        <% elsif contract.status&.name == "保留" %>
+                          <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
                         <% else %>
-                          <span class="badge bg-secondary text-dark rounded-pill">
-                            <i class="fas fa-circle me-1"></i><%= contract.status.name %>
-                          </span>
+                          <span class="badge bg-secondary status-badge"><%= contract.status&.name || "未設定" %></span>
                         <% end %>
                       </td>
                       <td>
@@ -221,11 +232,13 @@
                       </td>
                       <td class="text-end">
                         <div class="d-flex gap-2 justify-content-end">
-                          <%= link_to admin_contract_path(contract), class: "btn btn-sm btn-outline-primary rounded-pill" do %>
-                            <i class="fas fa-eye me-1"></i>詳細
+                          <%= link_to admin_contract_path(contract), class: "btn btn-sm btn-outline-primary d-flex flex-column align-items-center py-2" do %>
+                            <i class="fas fa-eye mb-1"></i>
+                            <span style="writing-mode: vertical-rl; text-orientation: mixed;">詳細</span>
                           <% end %>
-                          <%= link_to edit_admin_contract_path(contract), class: "btn btn-sm btn-outline-warning rounded-pill" do %>
-                            <i class="fas fa-edit me-1"></i>編集
+                          <%= link_to edit_admin_contract_path(contract), class: "btn btn-sm btn-outline-warning d-flex flex-column align-items-center py-2" do %>
+                            <i class="fas fa-edit mb-1"></i>
+                            <span style="writing-mode: vertical-rl; text-orientation: mixed;">編集</span>
                           <% end %>
                         </div>
                       </td>
@@ -236,7 +249,7 @@
             </div>
           <% else %>
             <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
-              <i class="fas fa-file-contract text-muted mb-3" style="font-size: 3rem;"></i>
+              <%= image_tag 'empty_contracts.png', alt: '契約書なし', class: 'mb-3', style: 'width: 120px; height: auto;' %>
               <h5 class="text-muted">契約書がまだ登録されていません</h5>
               <p class="text-muted mb-0">新しい契約書を作成してください。</p>
             </div>

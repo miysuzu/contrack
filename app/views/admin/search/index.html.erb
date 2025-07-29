@@ -1,7 +1,7 @@
 <!-- Heroセクション -->
-<section class="hero-section bg-contracts">
-  <div class="container pt-5 text-center text-white">
-    <h2 class="display-3 fw-bold">検索結果</h2>
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_admin.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h2 class="display-3 fw-bold" style="text-shadow: 0 2px 8px #0008;">検索結果</h2>
     <% if @keyword.present? %>
       <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">「<%= @keyword %>」の検索結果</p>
     <% else %>
@@ -79,40 +79,83 @@
               <thead class="table-light">
                 <tr>
                   <th>タイトル</th>
-                  <th>作成者</th>
                   <th>ステータス</th>
                   <th>タグ</th>
-                  <th>作成日</th>
-                  <th>操作</th>
+                  <th>期間</th>
+                  <th>更新日</th>
+                  <th class="text-end">操作</th>
                 </tr>
               </thead>
               <tbody>
                 <% @contracts.each do |contract| %>
                   <tr>
-                    <td><%= link_to contract.title, admin_contract_path(contract), class: "fw-bold text-decoration-none" %></td>
-                    <td><%= contract.user&.name || "管理者作成" %></td>
                     <td>
-                      <% case contract.status.name
-                         when "下書き" %>
-                        <span class="badge bg-light text-dark"><%= contract.status.name %></span>
-                      <% when "送信済" %>
-                        <span class="badge bg-warning text-dark"><%= contract.status.name %></span>
-                      <% when "締結済" %>
-                        <span class="badge bg-success"><%= contract.status.name %></span>
+                      <div class="d-flex align-items-center">
+                        <span class="fw-bold text-primary">
+                          <%= link_to contract.title, admin_contract_path(contract), class: "text-decoration-none text-primary" %>
+                        </span>
+                        <% if contract.admin_only? %>
+                          <span class="badge bg-danger ms-2" style="font-size: 0.7rem;">
+                            <i class="fas fa-user-shield me-1"></i>管理者専用
+                          </span>
+                        <% end %>
+                        <% if contract.user.nil? %>
+                          <span class="badge bg-warning ms-2" style="font-size: 0.7rem;">
+                            <i class="fas fa-user-shield me-1"></i>管理者作成
+                          </span>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td>
+                      <% if contract.status&.name == "下書き" %>
+                        <span class="badge bg-light status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "承認待ち" %>
+                        <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "確認中" %>
+                        <span class="badge bg-info status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "締結済" %>
+                        <span class="badge bg-success status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "アーカイブ済" %>
+                        <span class="badge bg-secondary status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "差し戻し" %>
+                        <span class="badge bg-danger status-badge"><%= contract.status.name %></span>
+                      <% elsif contract.status&.name == "保留" %>
+                        <span class="badge bg-warning status-badge"><%= contract.status.name %></span>
                       <% else %>
-                        <span class="badge bg-secondary text-dark"><%= contract.status.name %></span>
+                        <span class="badge bg-secondary status-badge"><%= contract.status&.name || "未設定" %></span>
                       <% end %>
                     </td>
                     <td>
                       <% contract.tags.each do |tag| %>
-                        <span class="badge bg-info text-dark me-1"><%= tag.name %></span>
+                        <%= link_to tag.name, admin_contracts_path(tag: tag.name),
+                            class: "badge bg-info text-dark me-1 text-decoration-none rounded-pill" %>
                       <% end %>
                     </td>
-                    <td><%= contract.created_at.strftime("%Y/%m/%d") %></td>
                     <td>
-                      <%= link_to '詳細', admin_contract_path(contract), class: "btn btn-sm btn-outline-primary me-1" %>
-                      <%= link_to '削除', admin_contract_path(contract), method: :delete, 
-                          data: { confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger" %>
+                      <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
+                        <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                      <% elsif contract.conclusion_date.present? %>
+                        <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~
+                      <% elsif contract.expiration_date.present? %>
+                        ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                    <td>
+                      <%= contract.renewal_date&.strftime('%Y/%m/%d') || "未設定" %>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex gap-2 justify-content-end">
+                        <%= link_to admin_contract_path(contract), class: "btn btn-sm btn-outline-primary d-flex flex-column align-items-center py-2" do %>
+                          <i class="fas fa-eye mb-1"></i>
+                          <span style="writing-mode: vertical-rl; text-orientation: mixed;">詳細</span>
+                        <% end %>
+                        <%= link_to edit_admin_contract_path(contract), class: "btn btn-sm btn-outline-warning d-flex flex-column align-items-center py-2" do %>
+                          <i class="fas fa-edit mb-1"></i>
+                          <span style="writing-mode: vertical-rl; text-orientation: mixed;">編集</span>
+                        <% end %>
+                      </div>
                     </td>
                   </tr>
                 <% end %>
@@ -122,9 +165,10 @@
         </div>
       </div>
     <% else %>
-      <div class="alert alert-info text-center">
-        <i class="fas fa-search me-2"></i>
-        該当する契約書が見つかりませんでした。
+      <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
+        <%= image_tag 'empty_contracts.png', alt: '契約書なし', class: 'mb-3', style: 'width: 120px; height: auto;' %>
+        <h5 class="text-muted">該当する契約書が見つかりませんでした</h5>
+        <p class="text-muted mb-0">検索条件を変更してお試しください。</p>
       </div>
     <% end %>
   <% end %>

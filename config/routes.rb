@@ -85,7 +85,7 @@ root to: 'homes#top'
   end
   resources :tags, only: [:index, :create]
   resources :group_searches, only: [:index]
-  resources :group_join_requests, only: [:create, :index] do
+  resources :group_join_requests, only: [:create, :index, :destroy] do
     member do
       post :approve
       post :reject

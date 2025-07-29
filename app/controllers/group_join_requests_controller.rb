@@ -52,4 +52,15 @@ class GroupJoinRequestsController < ApplicationController
       redirect_to group_join_requests_path, alert: '拒否できません。'
     end
   end
+
+  def destroy
+    request = GroupJoinRequest.find(params[:id])
+    # 自分の申請のみ取り消し可能
+    if request.user_id == current_user.id && request.pending?
+      request.destroy
+      redirect_to group_searches_path, notice: '申請を取り消しました。'
+    else
+      redirect_to group_searches_path, alert: '申請を取り消せません。'
+    end
+  end
 end
