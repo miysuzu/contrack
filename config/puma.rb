@@ -8,15 +8,17 @@ worker_timeout 3600 if ENV.fetch("RAILS_ENV", "development") == "development"
 environment ENV.fetch("RAILS_ENV") { "production" }
 
 # UNIXソケットでバインド
-bind "unix://#{Rails.root.to_s}/tmp/sockets/puma.sock"
+app_dir = Dir.pwd
+bind "unix://#{app_dir}/tmp/sockets/puma.sock"
 
 # 本番環境の設定
-if Rails.env.production?
-  pidfile "#{Rails.root.to_s}/tmp/pids/puma.pid"
-  state_path "#{Rails.root.to_s}/tmp/pids/puma.state"
-  stdout_redirect "#{Rails.root.to_s}/log/puma.stdout.log", "#{Rails.root.to_s}/log/puma.stderr.log", true
+if ENV["RAILS_ENV"] == "production"
+  pidfile "#{app_dir}/tmp/pids/puma.pid"
+  state_path "#{app_dir}/tmp/pids/puma.state"
+  stdout_redirect "#{app_dir}/log/puma.stdout.log", "#{app_dir}/log/puma.stderr.log", true
   daemonize true
 end
 
 # 再起動対応
 plugin :tmp_restart
+
