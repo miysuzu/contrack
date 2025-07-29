@@ -831,10 +831,3 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
-
-@import "header";
-
-body::before {
-  content: "webpacker-catch";
-  display: none;
-}
