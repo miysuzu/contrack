@@ -14,9 +14,9 @@ statuses = [
 ]
 
 statuses.each do |status|
-  Status.find_or_create_by!(name: status[:name]) do |s|
-    s.color = status[:color]
-  end
+  record = Status.find_or_initialize_by(name: status[:name])
+  record.color = status[:color]
+  record.save!
 end
 
 group_names = %w(営業部 法務部 経理部)
