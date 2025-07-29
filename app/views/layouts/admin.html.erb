@@ -177,10 +177,20 @@
               <% @comment_notifications.each do |notification| %>
                 <div class="notification-item">
                   <div class="notification-title">
-                    <%= link_to notification.comment.contract.title, admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                    <% if notification.comment.contract&.title.present? %>
+                      <%= link_to notification.comment.contract.title, admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                    <% else %>
+                      <%= link_to "タイトルなしの契約書", admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                    <% end %>
                   </div>
                   <div class="notification-detail">
-                    <%= notification.comment.commentable.name %>さんがコメントしました
+                    <% if notification.comment.commentable&.respond_to?(:name) %>
+                      <%= notification.comment.commentable.name %>さんがコメントしました
+                    <% elsif notification.comment.commentable&.respond_to?(:email) %>
+                      <%= notification.comment.commentable.email %>さんがコメントしました
+                    <% else %>
+                      不明なユーザーがコメントしました
+                    <% end %>
                     <small class="text-muted d-block">
                       <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
                     </small>
