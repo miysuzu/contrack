@@ -11,16 +11,54 @@
   <div class="text-center mb-4">
     <h2 class="display-5 fw-bold text-primary mb-3"><%= @contract.title %></h2>
     <div class="mb-4">
-      <% case @contract.status.name
-         when "下書き" %>
-        <span class="badge bg-light text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
-      <% when "送信済" %>
-        <span class="badge bg-warning text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
-      <% when "締結済" %>
-        <span class="badge bg-success fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
-      <% else %>
-        <span class="badge bg-secondary text-dark fs-5 px-4 py-2 rounded-pill"><%= @contract.status.name %></span>
-      <% end %>
+      <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+        <% case @contract.status.name
+           when "下書き" %>
+          <span class="badge bg-light text-dark fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-edit me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "承認待ち" %>
+          <span class="badge bg-info text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-clock me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "確認中" %>
+          <span class="badge bg-warning text-dark fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-search me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "締結済" %>
+          <span class="badge bg-success text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-check-circle me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "アーカイブ済" %>
+          <span class="badge bg-light text-dark fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-archive me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "差し戻し" %>
+          <span class="badge bg-danger text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-times-circle me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "保留" %>
+          <span class="badge bg-primary text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-pause me-2"></i><%= @contract.status.name %>
+          </span>
+        <% when "キャンセル済" %>
+          <span class="badge bg-dark text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-ban me-2"></i><%= @contract.status.name %>
+          </span>
+        <% else %>
+          <span class="badge bg-secondary text-white fs-5 px-4 py-2 rounded-pill">
+            <i class="fas fa-circle me-2"></i><%= @contract.status.name %>
+          </span>
+        <% end %>
+        
+        <% if @contract.tags.any? %>
+          <% @contract.tags.each do |tag| %>
+            <span class="badge bg-info text-dark fs-5 px-4 py-2 rounded-pill">
+              <i class="fas fa-tag me-2"></i><%= tag.name %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>
@@ -36,6 +74,42 @@
       </h5>
     </div>
     <div class="card-body p-4">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-user me-3 text-primary fa-lg"></i>
+            <div>
+              <strong class="text-dark">作成者</strong><br>
+              <% if @contract.user.present? %>
+                <span class="badge bg-primary text-white px-3 py-1 rounded-pill">
+                  <i class="fas fa-user me-1"></i><%= @contract.user.name %> (会員)
+                </span>
+              <% elsif @contract.admin.present? %>
+                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill">
+                  <i class="fas fa-user-shield me-1"></i><%= @contract.admin.name %> (管理者)
+                </span>
+              <% else %>
+                <span class="text-muted">不明</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-users me-3 text-secondary fa-lg"></i>
+            <div>
+              <strong class="text-dark">所属グループ</strong><br>
+              <% if @contract.group.present? %>
+                <span class="badge bg-outline-secondary border border-secondary text-secondary px-3 py-1 rounded-pill">
+                  <i class="fas fa-users me-1"></i><%= @contract.group.name %>
+                </span>
+              <% else %>
+                <span class="text-muted">未設定</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row mb-4">
         <div class="col-md-6">
           <div class="d-flex align-items-center mb-3">
@@ -78,16 +152,7 @@
           </div>
         </div>
       </div>
-      <% if @contract.tags.any? %>
-        <div class="mb-4">
-          <strong class="text-dark">タグ</strong>
-          <div class="mt-2">
-            <% @contract.tags.each do |tag| %>
-              <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-2 px-3 py-2 rounded-pill" %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
+
       <% if @contract.attachments.attached? %>
         <div>
           <strong class="text-dark">添付ファイル</strong>

@@ -1,5 +1,6 @@
 class Contract < ApplicationRecord
   belongs_to :user, optional: true
+  belongs_to :admin, optional: true
   belongs_to :status
   belongs_to :group
   belongs_to :company, optional: true

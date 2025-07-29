@@ -22,7 +22,6 @@
         <h2 class="text-center fw-bold text-primary mb-4">管理者ログイン</h2>
 
         <%= form_for(:admin, url: admin_session_path) do |f| %>
-          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
 
           <div class="mb-3">
             <%= f.label :email, "メールアドレス", class: "form-label fw-bold" %>

@@ -63,6 +63,16 @@ class Comment < ApplicationRecord
       )
     end
     
+    # 契約書の管理者に通知を作成（会員がコメントした場合）
+    if contract.admin.present? && commentable.is_a?(User)
+      CommentNotification.create!(
+        user: nil,
+        admin: contract.admin,
+        comment: self,
+        read: false
+      )
+    end
+    
     # 親コメントの作成者に通知を作成（返信の場合）
     if parent.present? && parent.commentable != commentable
       if parent.commentable.is_a?(User)
@@ -76,6 +86,33 @@ class Comment < ApplicationRecord
         CommentNotification.create!(
           user: commentable.is_a?(User) ? commentable : nil,
           admin: parent.commentable,
+          comment: self,
+          read: false
+        )
+      end
+    end
+    
+    # 管理者がコメントした場合の通知
+    if commentable.is_a?(Admin)
+      # 契約書の作成者（管理者）にも通知を作成（自分以外の場合）
+      if contract.admin.present? && contract.admin != commentable
+        CommentNotification.create!(
+          user: nil,
+          admin: contract.admin,
+          comment: self,
+          read: false
+        )
+      end
+      
+      # 同じ契約書にコメントした他の管理者に通知を作成
+      other_admins = contract.comments.where.not(commentable: commentable)
+                             .where(commentable_type: 'Admin')
+                             .distinct.pluck(:commentable_id)
+      
+      other_admins.each do |admin_id|
+        CommentNotification.create!(
+          user: nil,
+          admin_id: admin_id,
           comment: self,
           read: false
         )

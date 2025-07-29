@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_07_28_064452) do
+ActiveRecord::Schema.define(version: 2025_07_29_191000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
     t.integer "record_id", null: false
-    t.bigint "blob_id", null: false
+    t.integer "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
@@ -61,12 +61,12 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
   end
 
   create_table "comment_notifications", force: :cascade do |t|
-    t.integer "admin_id", null: false
+    t.integer "admin_id"
     t.integer "comment_id", null: false
     t.boolean "read", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.index ["admin_id"], name: "index_comment_notifications_on_admin_id"
     t.index ["comment_id"], name: "index_comment_notifications_on_comment_id"
     t.index ["user_id"], name: "index_comment_notifications_on_user_id"
@@ -101,7 +101,7 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
   end
 
   create_table "contracts", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.integer "status_id", null: false
     t.string "title"
     t.text "description"
@@ -114,6 +114,8 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.date "conclusion_date"
     t.integer "company_id", null: false
     t.boolean "admin_only"
+    t.integer "admin_id"
+    t.index ["admin_id"], name: "index_contracts_on_admin_id"
     t.index ["company_id"], name: "index_contracts_on_company_id"
     t.index ["group_id"], name: "index_contracts_on_group_id"
   end
@@ -153,7 +155,7 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
     t.string "name"
     t.text "content"
     t.string "category"
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.integer "company_id", null: false
     t.boolean "is_default"
     t.datetime "created_at", precision: 6, null: false
@@ -228,6 +230,7 @@ ActiveRecord::Schema.define(version: 2025_07_28_064452) do
   add_foreign_key "comments", "contracts"
   add_foreign_key "contract_user_shares", "contracts"
   add_foreign_key "contract_user_shares", "users"
+  add_foreign_key "contracts", "admins"
   add_foreign_key "contracts", "companies"
   add_foreign_key "contracts", "groups"
   add_foreign_key "contracts", "statuses"

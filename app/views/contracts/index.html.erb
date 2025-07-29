@@ -1,5 +1,4 @@
 <% if params[:keyword].present? || params[:tag].present? || params[:status_id].present? || params[:group_id].present? %>
-  <!-- 検索結果のヒーローセクション -->
   <section class="hero-section bg-contracts">
     <div class="container pt-5 text-center text-white">
       <h2 class="display-3 fw-bold">検索結果</h2>
@@ -11,7 +10,6 @@
     </div>
   </section>
 <% else %>
-  <!-- 通常のヒーローセクション -->
   <section class="hero-section bg-contracts">
     <div class="container pt-5 text-center text-white">
       <h2 class="display-3 fw-bold">契約書一覧</h2>
@@ -21,15 +19,13 @@
 <% end %>
 
 <main class="container my-5" style="max-width: 1400px; min-height: calc(100vh - 900px);">
-
-  <!-- 新規作成ボタン -->
   <div class="text-end mb-4">
     <%= link_to new_contract_path, class: "btn btn-success btn-lg rounded-pill px-4 shadow" do %>
       <i class="fas fa-plus me-2"></i>新規作成
     <% end %>
   </div>
 
-  <!-- 検索・フィルター -->
+  <!-- フィルター -->
   <div class="card rounded-4 shadow-sm mb-5 border-0 search-card">
     <div class="card-body">
       <%= form_with url: contracts_path, method: :get, local: true do %>
@@ -38,24 +34,20 @@
             <label class="form-label fw-semibold">キーワード検索</label>
             <div class="input-group">
               <span class="input-group-text"><i class="fas fa-search"></i></span>
-              <%= text_field_tag :keyword, params[:keyword], 
-                  class: "form-control", 
-                  placeholder: "タイトルまたは内容で検索..." %>
+              <%= text_field_tag :keyword, params[:keyword], class: "form-control", placeholder: "タイトルまたは内容で検索..." %>
             </div>
           </div>
           <div class="col-lg-3">
             <label class="form-label fw-semibold">並び順</label>
-            <%= select_tag :sort, 
-                options_for_select([
-                  ["作成日順（新しい順）", "created_desc"],
-                  ["作成日順（古い順）", "created_asc"],
-                  ["更新日順（新しい順）", "updated_desc"],
-                  ["更新日順（古い順）", "updated_asc"],
-                  ["満了日順（近い順）", "expiration_asc"],
-                  ["満了日順（遠い順）", "expiration_desc"],
-                  ["タイトル順", "title_asc"]
-                ], params[:sort] || "created_desc"),
-                class: "form-select" %>
+            <%= select_tag :sort, options_for_select([
+                ["作成日順（新しい順）", "created_desc"],
+                ["作成日順（古い順）", "created_asc"],
+                ["更新日順（新しい順）", "updated_desc"],
+                ["更新日順（古い順）", "updated_asc"],
+                ["満了日順（近い順）", "expiration_asc"],
+                ["満了日順（遠い順）", "expiration_desc"],
+                ["タイトル順", "title_asc"]
+              ], params[:sort] || "created_desc"), class: "form-select" %>
           </div>
           <div class="col-lg-3">
             <div class="d-flex gap-2">
@@ -66,25 +58,22 @@
         </div>
       <% end %>
 
-      <!-- タグフィルタ -->
+      <!-- タグ -->
       <div class="mt-4">
         <div class="mb-2 fw-semibold">タグで絞り込む：</div>
         <% ActsAsTaggableOn::Tag.all.each do |tag| %>
-          <%= link_to tag.name, contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort]), 
-              class: "badge rounded-pill bg-info text-dark me-2 px-3 py-2 text-decoration-none" %>
+          <%= link_to tag.name, contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort]), class: "badge rounded-pill bg-info text-dark me-2 px-3 py-2 text-decoration-none" %>
         <% end %>
       </div>
 
-      <!-- ステータスフィルタ -->
+      <!-- ステータス -->
       <div class="row mt-4 align-items-center">
         <div class="col-md-3 fw-semibold">ステータスで絞り込み：</div>
         <div class="col-md-6">
           <div class="btn-group flex-wrap" role="group">
-            <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort]), 
-                class: "btn btn-outline-secondary #{'active' unless params[:status_id].present?}" %>
+            <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort]), class: "btn btn-outline-secondary #{'active' unless params[:status_id].present?}" %>
             <% Status.all.each do |status| %>
-              <%= link_to status.name, contracts_path(status_id: status.id, keyword: params[:keyword], sort: params[:sort]), 
-                  class: "btn btn-outline-secondary #{'active' if params[:status_id].to_i == status.id}" %>
+              <%= link_to status.name, contracts_path(status_id: status.id, keyword: params[:keyword], sort: params[:sort]), class: "btn btn-outline-secondary #{'active' if params[:status_id].to_i == status.id}" %>
             <% end %>
           </div>
         </div>
@@ -93,50 +82,35 @@
         </div>
       </div>
 
-      <!-- グループフィルタ -->
-      <% if current_user.company %>
-        <div class="row mt-4 align-items-center">
-          <div class="col-md-3 fw-semibold">グループで絞り込み：</div>
-          <div class="col-md-6">
-            <div class="btn-group flex-wrap" role="group">
-              <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-                  class: "btn btn-outline-secondary #{'active' unless params[:group_id].present?}" %>
-              <% Group.where(company_id: current_user.company_id).order(:name).each do |group| %>
-                <%= link_to group.name, contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-                    class: "btn btn-outline-secondary #{'active' if params[:group_id].to_i == group.id}" %>
-              <% end %>
-            </div>
+      <!-- グループ -->
+      <div class="row mt-4 align-items-center">
+        <div class="col-md-3 fw-semibold">グループで絞り込み：</div>
+        <div class="col-md-6">
+          <div class="btn-group flex-wrap" role="group">
+            <%= link_to "すべて", contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), class: "btn btn-outline-secondary #{'active' unless params[:group_id].present?}" %>
+            <% current_user.groups.order(:name).each do |group| %>
+              <%= link_to group.name, contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), class: "btn btn-outline-secondary #{'active' if params[:group_id].to_i == group.id}" %>
+            <% end %>
           </div>
         </div>
-      <% end %>
+      </div>
     </div>
   </div>
 
-  <!-- メインコンテンツエリア -->
+  <!-- メイン表示 -->
   <div class="row">
-    <!-- 左サイドバー - グループ選択 -->
     <div class="col-md-3">
       <div class="card shadow-sm rounded-4 border-0">
         <div class="card-body">
           <h6 class="text-primary fw-bold mb-3">[所属グループ]</h6>
-          
-          <!-- すべてのグループ -->
-          <%= link_to contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-              class: "btn #{params[:group_id].blank? ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
+          <%= link_to contracts_path(keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), class: "btn #{params[:group_id].blank? ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
             <i class="fas fa-users me-2"></i>すべてのグループ
           <% end %>
-
-          <!-- グループ一覧 -->
-          <% if current_user.company %>
-            <% Group.where(company_id: current_user.company_id).order(:name).each do |group| %>
-              <%= link_to contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), 
-                  class: "btn #{params[:group_id].to_i == group.id ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
-                <i class="fas fa-users me-2"></i><%= group.name %>
-              <% end %>
+          <% current_user.groups.order(:name).each do |group| %>
+            <%= link_to contracts_path(group_id: group.id, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id]), class: "btn #{params[:group_id].to_i == group.id ? 'btn-primary' : 'btn-outline-primary'} w-100 mb-2 rounded-pill" do %>
+              <i class="fas fa-users me-2"></i><%= group.name %>
             <% end %>
           <% end %>
-
-          <!-- グループ追加ボタン -->
           <%= link_to group_searches_path, class: "btn btn-outline-info w-100 rounded-pill" do %>
             <i class="fas fa-plus me-2"></i>グループを追加
           <% end %>
@@ -144,15 +118,14 @@
       </div>
     </div>
 
-    <!-- 右メインエリア - 契約一覧 -->
     <div class="col-md-9">
       <div class="card shadow-sm rounded-4 border-0">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0">
               <% if params[:group_id].present? %>
-                <% selected_group = Group.find(params[:group_id]) %>
-                <%= selected_group.name %>の契約一覧
+                <% selected_group = current_user.groups.find_by(id: params[:group_id]) %>
+                <%= selected_group&.name || "不明なグループ" %>の契約一覧
               <% else %>
                 すべての契約一覧
               <% end %>
@@ -160,7 +133,7 @@
             <span class="badge bg-secondary fs-6">全<%= @contracts.total_count %>件</span>
           </div>
 
-          <% if @contracts.where(admin_only: false).any? %>
+          <% if @contracts.any? %>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -174,61 +147,35 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% @contracts.where(admin_only: false).each do |contract| %>
+                  <% @contracts.each do |contract| %>
                     <tr>
                       <td>
-                        <div class="d-flex align-items-center">
-                          <span class="fw-bold text-primary">
-                            <%= link_to contract.title, contract_path(contract), class: "text-decoration-none text-primary" %>
-                          </span>
-                        </div>
+                        <%= link_to contract.title, contract_path(contract), class: "fw-bold text-decoration-none text-primary" %>
                       </td>
                       <td>
-                        <% case contract.status.name
-                           when "下書き" %>
-                          <span class="badge bg-light text-dark rounded-pill">
-                            <i class="fas fa-edit me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "送信済" %>
-                          <span class="badge bg-warning text-dark rounded-pill">
-                            <i class="fas fa-paper-plane me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% when "締結済" %>
-                          <span class="badge bg-success rounded-pill">
-                            <i class="fas fa-check-circle me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% else %>
-                          <span class="badge bg-secondary text-dark rounded-pill">
-                            <i class="fas fa-circle me-1"></i><%= contract.status.name %>
-                          </span>
-                        <% end %>
+                        <span class="badge bg-secondary"><%= contract.status&.name || "未設定" %></span>
                       </td>
                       <td>
                         <% contract.tags.each do |tag| %>
-                          <%= link_to tag.name, contracts_path(tag: tag.name, keyword: params[:keyword], sort: params[:sort], status_id: params[:status_id], group_id: params[:group_id]),
-                              class: "badge bg-info text-dark me-1 text-decoration-none rounded-pill" %>
+                          <%= link_to tag.name, contracts_path(tag: tag.name), class: "badge bg-info text-dark me-1 text-decoration-none" %>
                         <% end %>
                       </td>
                       <td>
-                        <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
-                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
-                        <% elsif contract.conclusion_date.present? %>
-                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~
-                        <% elsif contract.expiration_date.present? %>
-                          ~ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                        <% if contract.conclusion_date && contract.expiration_date %>
+                          <%= contract.conclusion_date.strftime("%Y/%m/%d") %> ~ <%= contract.expiration_date.strftime("%Y/%m/%d") %>
                         <% else %>
                           -
                         <% end %>
                       </td>
                       <td>
-                        <%= contract.renewal_date&.strftime('%Y/%m/%d') || "未設定" %>
+                        <%= contract.renewal_date&.strftime("%Y/%m/%d") || "未設定" %>
                       </td>
                       <td class="text-end">
                         <div class="d-flex gap-2 justify-content-end">
-                          <%= link_to contract_path(contract), class: "btn btn-sm btn-outline-primary rounded-pill" do %>
+                          <%= link_to contract_path(contract), class: "btn btn-sm btn-outline-primary" do %>
                             <i class="fas fa-eye me-1"></i>詳細
                           <% end %>
-                          <%= link_to edit_contract_path(contract), class: "btn btn-sm btn-outline-warning rounded-pill" do %>
+                          <%= link_to edit_contract_path(contract), class: "btn btn-sm btn-outline-warning" do %>
                             <i class="fas fa-edit me-1"></i>編集
                           <% end %>
                         </div>
@@ -248,11 +195,9 @@
         </div>
       </div>
 
-      <%# --- ページネーション --- %>
       <div class="mt-5">
         <%= paginate @contracts %>
       </div>
     </div>
   </div>
-
 </main>

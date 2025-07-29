@@ -6,30 +6,46 @@ class ContractsController < ApplicationController
   before_action :ensure_owner!, only: [:edit, :update, :destroy]
 
   def index
-    # ユーザーの契約書と会社の契約書（管理者作成を含む）を取得
-    @contracts = if current_user.company
-      Contract.where(company_id: current_user.company_id, admin_only: false)
-    else
-      current_user.contracts.where(admin_only: false)
+    # 所属グループのIDのみ取得
+    group_ids = current_user.groups.pluck(:id)
+    
+    Rails.logger.info "DEBUG: ユーザーID=#{current_user.id}, 所属グループID=#{group_ids}"
+  
+    # ビュー用：所属グループ一覧のみ
+    @groups = current_user.groups
+  
+    # 選択されたグループが自分の所属グループか確認して取得
+    @selected_group = current_user.groups.find_by(id: params[:group_id]) if params[:group_id].present?
+  
+    # 契約書一覧（自分が作成 or 所属グループ or 管理者作成でadmin_only=false）＋ admin_only が true ではないもの
+    @contracts = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+      Contract.arel_table[:user_id].eq(current_user.id)
+      .or(Contract.arel_table[:group_id].in(group_ids))
+      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
+    )
+    
+    Rails.logger.info "DEBUG: admin_only=false の契約書数=#{@contracts.where(admin_only: false).count}"
+    Rails.logger.info "DEBUG: admin_only=NULL の契約書数=#{@contracts.where(admin_only: nil).count}"
+    Rails.logger.info "DEBUG: 管理者作成の契約書数=#{@contracts.where(user_id: nil).count}"
+    
+    Rails.logger.info "DEBUG: 取得された契約書数=#{@contracts.count}"
+    Rails.logger.info "DEBUG: 契約書一覧=#{@contracts.pluck(:id, :title, :user_id, :group_id, :admin_only)}"
+  
+    # 特定グループでさらに絞り込み（所属している場合のみ）
+    if @selected_group
+      @contracts = @contracts.where(group_id: @selected_group.id)
+      Rails.logger.info "グループフィルター適用: group_id=#{@selected_group.id}"
     end
   
-    # キーワード検索（タイトル or 本文）
+    # キーワード検索
     if params[:keyword].present?
       keyword = "%#{params[:keyword]}%"
       @contracts = @contracts.where("title LIKE ? OR body LIKE ?", keyword, keyword)
     end
   
-    # タグ絞り込み
+    # タグ・ステータス絞り込み
     @contracts = @contracts.tagged_with(params[:tag]) if params[:tag].present?
-  
-    # ステータス絞り込み
     @contracts = @contracts.where(status_id: params[:status_id]) if params[:status_id].present?
-
-    # グループ絞り込み
-    if params[:group_id].present?
-      @contracts = @contracts.where(group_id: params[:group_id])
-      Rails.logger.info "グループフィルター適用: group_id=#{params[:group_id]}"
-    end
   
     # 並び順
     case params[:sort]
@@ -46,16 +62,16 @@ class ContractsController < ApplicationController
     when "title_asc"
       @contracts = @contracts.order(:title)
     else
-      @contracts = @contracts.order(created_at: :desc) # デフォルト
+      @contracts = @contracts.order(created_at: :desc)
     end
-
-    @contracts = @contracts.page(params[:page]).per(15)
-  end
   
+    @contracts = @contracts.page(params[:page]).per(15)
+  end  
 
   def show
     @slack_message = generate_slack_message_for_contract(@contract)
-    # 各カテゴリのテンプレートを取得
+
+    # Slackテンプレート（カテゴリ別）を取得
     @slack_templates = {}
     %w[default created updated expiring renewal].each do |category|
       @slack_templates[category] = find_templates_for_category(@contract, category)
@@ -64,27 +80,26 @@ class ContractsController < ApplicationController
 
   def new
     @contract = Contract.new
-    # ユーザーの会社のグループのみを取得
     @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
   end
 
   def create
+    # ログイン中のユーザーに紐づけて契約書を作成
     @contract = current_user.contracts.build(contract_params)
     @contract.company = current_user.company if current_user.company
+
     if @contract.save
       if params[:contract][:shared_user_ids]
         @contract.shared_user_ids = params[:contract][:shared_user_ids].reject(&:blank?)
       end
       redirect_to contract_path(@contract), notice: "契約書を作成しました。"
     else
-      # エラー時に@groupsを再設定
       @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
       render :new
     end
   end
 
   def edit
-    # ユーザーの会社のグループのみを取得
     @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
   end
 
@@ -97,7 +112,6 @@ class ContractsController < ApplicationController
       end
       redirect_to @contract, notice: "契約書を更新しました。"
     else
-      # エラー時に@groupsを再設定
       @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
       render :edit
     end
@@ -109,40 +123,43 @@ class ContractsController < ApplicationController
   end
 
   def slack_message
-    # ユーザーの契約書と会社の契約書（管理者作成を含む）から取得
-    @contract = if current_user.company
-      Contract.where(company_id: current_user.company_id, admin_only: false).find(params[:id])
-    else
-      current_user.contracts.where(admin_only: false).find(params[:id])
-    end
+    group_ids = current_user.groups.pluck(:id)
+
+    # slack_message も同様に、会員が見てよい契約書に限定
+    @contract = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+      Contract.arel_table[:user_id].eq(current_user.id)
+      .or(Contract.arel_table[:group_id].in(group_ids))
+      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
+    ).find(params[:id])
+
     message_type = params[:type] || 'default'
     template_id = params[:template_id]
-    
+
     if template_id.present?
-      # 特定のテンプレートを使用
       template = current_user.company.slack_message_templates.find(template_id)
       slack_message = replace_variables(template.content, @contract)
     else
-      # 従来の方法でメッセージ生成
       slack_message = generate_slack_message_for_contract(@contract, message_type)
     end
-    
+
     render plain: slack_message
   end
 
   private
 
   def set_contract
-    # ユーザーの契約書と会社の契約書（管理者作成を含む）から取得
-    @contract = if current_user.company
-      Contract.where(company_id: current_user.company_id, admin_only: false).find(params[:id])
-    else
-      current_user.contracts.where(admin_only: false).find(params[:id])
-    end
+    group_ids = current_user.groups.pluck(:id)
+
+    # show/edit/update/destroy で取得できる契約書も同じく絞り込み
+    @contract = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+      Contract.arel_table[:user_id].eq(current_user.id)
+      .or(Contract.arel_table[:group_id].in(group_ids))
+      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
+    ).find(params[:id])
   end
 
   def ensure_owner!
-    # 管理者作成の契約書（userがnil）の場合は編集不可
+    # 管理者作成（user_idがnil）は編集不可
     if @contract.user.nil?
       redirect_to contracts_path, alert: "管理者作成の契約書は編集できません。"
     elsif @contract.user != current_user
@@ -151,13 +168,15 @@ class ContractsController < ApplicationController
   end
 
   def contract_params
-    params.require(:contract).permit(:title, :body, :status_id, :tag_list, :expiration_date, :renewal_date, :group_id, :conclusion_date, attachments: [])
+    params.require(:contract).permit(
+      :title, :body, :status_id, :tag_list,
+      :expiration_date, :renewal_date, :group_id, :conclusion_date,
+      attachments: []
+    )
   end
 
   def find_templates_for_category(contract, category)
     return [] unless contract.user&.company
-    
-    templates = contract.user.company.slack_message_templates.by_category(category)
-    templates.order(:is_default, :name)
-  end  
+    contract.user.company.slack_message_templates.by_category(category).order(:is_default, :name)
+  end
 end

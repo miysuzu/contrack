@@ -11,12 +11,15 @@ class Admin::ContractsController < Admin::ApplicationController
       Contract.none
 
     # キーワード検索
-    if params[:contract][:user_id]&.start_with?('admin_')
+    if params[:contract] && params[:contract][:user_id]&.start_with?('admin_')
+      contract_params_with_admin = contract_params
       contract_params_with_admin[:user_id] = nil                  # userなし
       @contract = Contract.new(contract_params_with_admin)
       @contract.admin = current_admin                             # adminに紐付け
+    elsif params[:contract]
+      @contract = Contract.new(contract_params)
     else
-      @contract = Contract.new(contract_params_with_admin)
+      @contract = Contract.new
     end
 
     # タグ絞り込み
@@ -43,7 +46,7 @@ class Admin::ContractsController < Admin::ApplicationController
     when "title_asc"
       @contracts = @contracts.order(:title)
     else
-      @contracts = @contracts.order(created_at: :desc) # デフォルト
+      @contracts = @contracts.order(created_at: :desc) 
     end
   end
 
@@ -75,6 +78,8 @@ class Admin::ContractsController < Admin::ApplicationController
   
     if params[:contract][:user_id]&.start_with?('admin_')
       @contract.admin = current_admin
+      # admin_only フラグはフォームのチェックボックスで制御
+      @contract.admin_only = params[:contract][:admin_only] == '1'
     end
   
     @contract.company = current_admin.company if current_admin.company
@@ -109,26 +114,27 @@ class Admin::ContractsController < Admin::ApplicationController
   end
 
   def update
-    # 管理者が選択された場合、user_idをnilに設定
     contract_params_with_admin = contract_params
+  
     if params[:contract][:user_id]&.start_with?('admin_')
-      contract_params_with_admin[:user_id] = current_admin.id
+      contract_params_with_admin[:user_id] = nil
+      @contract.admin = current_admin
+      # admin_only フラグはフォームのチェックボックスで制御
+      @contract.admin_only = params[:contract][:admin_only] == '1'
     end
-    
+  
     if @contract.update(contract_params_with_admin)
       redirect_to admin_contract_path(@contract), notice: "契約書を更新しました。"
     else
-      # エラー時に@groupsと@usersを再設定
       @groups = current_admin.company ? Group.where(company_id: current_admin.company_id).order(:name) : Group.none
       @users = current_admin.company ? current_admin.company.users.order(:name) : User.none
-      # 管理者をユーザーリストに追加（仮想的なユーザーとして）
       if current_admin.company
         admin_user = OpenStruct.new(id: "admin_#{current_admin.id}", name: "管理者（#{current_admin.email}）")
         @users = [admin_user] + @users.to_a
       end
       render :edit
     end
-  end
+  end  
 
   def destroy
     @contract.destroy
