@@ -11,9 +11,12 @@ class Admin::ContractsController < Admin::ApplicationController
       Contract.none
 
     # キーワード検索
-    if params[:keyword].present?
-      keyword = "%#{params[:keyword]}%"
-      @contracts = @contracts.where("contracts.title LIKE ? OR contracts.body LIKE ?", keyword, keyword)
+    if params[:contract][:user_id]&.start_with?('admin_')
+      contract_params_with_admin[:user_id] = nil                  # userなし
+      @contract = Contract.new(contract_params_with_admin)
+      @contract.admin = current_admin                             # adminに紐付け
+    else
+      @contract = Contract.new(contract_params_with_admin)
     end
 
     # タグ絞り込み
@@ -61,22 +64,29 @@ class Admin::ContractsController < Admin::ApplicationController
   end
 
   def create
-    # 管理者が選択された場合、user_idをnilに設定
     contract_params_with_admin = contract_params
+  
     if params[:contract][:user_id]&.start_with?('admin_')
-      contract_params_with_admin[:user_id] = current_admin.id
+      Rails.logger.info "DEBUG: 管理者による作成 - user_id を nil に設定"
+      contract_params_with_admin[:user_id] = nil
     end
-    
+  
     @contract = Contract.new(contract_params_with_admin)
+  
+    if params[:contract][:user_id]&.start_with?('admin_')
+      @contract.admin = current_admin
+    end
+  
     @contract.company = current_admin.company if current_admin.company
+  
+    Rails.logger.info "DEBUG: user_id=#{@contract.user_id.inspect}, admin_id=#{@contract.admin_id.inspect}"
+  
     if @contract.save
       redirect_to admin_contract_path(@contract), notice: "契約書を作成しました。"
     else
       Rails.logger.error "Contract save failed: #{@contract.errors.full_messages.join(', ')}"
-      # エラー時に@groupsと@usersを再設定
       @groups = current_admin.company ? Group.where(company_id: current_admin.company_id).order(:name) : Group.none
       @users = current_admin.company ? current_admin.company.users.order(:name) : User.none
-      # 管理者をユーザーリストに追加（仮想的なユーザーとして）
       if current_admin.company
         admin_user = OpenStruct.new(id: "admin_#{current_admin.id}", name: "管理者（#{current_admin.email}）")
         @users = [admin_user] + @users.to_a
@@ -84,6 +94,7 @@ class Admin::ContractsController < Admin::ApplicationController
       render :new
     end
   end
+  
 
   def edit
     # 管理者の会社のグループのみを取得（名前順）

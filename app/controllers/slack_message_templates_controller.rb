@@ -21,7 +21,6 @@ class SlackMessageTemplatesController < ApplicationController
     if @template.save
       redirect_to slack_message_templates_path, notice: 'テンプレートを作成しました。'
     else
-      flash[:validation_errors] = @template.errors.full_messages
       render :new
     end
   end
@@ -33,7 +32,6 @@ class SlackMessageTemplatesController < ApplicationController
     if @template.update(template_params)
       redirect_to slack_message_templates_path, notice: 'テンプレートを更新しました。'
     else
-      flash[:validation_errors] = @template.errors.full_messages
       render :edit
     end
   end

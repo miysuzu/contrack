@@ -5,7 +5,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: url('menu_bg.png') right center / cover no-repeat;
+  background-image: image-url("menu_bg.png");
+  background-position: right center;
+  background-size: cover;
+  background-repeat: no-repeat;
   color: white;
   z-index: 1050;
   display: none;

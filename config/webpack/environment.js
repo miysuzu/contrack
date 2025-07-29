@@ -18,7 +18,15 @@ sassLoader.use = sassLoader.use.map(loader => {
       ...loader,
       options: {
         ...loader.options,
-        implementation: require('sass')
+        implementation: require('sass'),
+        sassOptions: {
+          includePaths: ['app/assets/images'],
+          functions: {
+            'image-url($url)': function (url) {
+              return new require('sass').types.String(`url("../assets/images/${url.getValue()}")`)
+            }
+          }
+        }
       }
     }
   }

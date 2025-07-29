@@ -10,7 +10,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
   <!-- Bootstrap + 独自CSS + JS -->
-  <%= stylesheet_pack_tag "application", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
   <%= javascript_pack_tag "application", "data-turbo-track": "reload" %>  
 </head>
 
@@ -215,7 +215,7 @@
       </div>
     <% end %>
     
-    <% if flash[:validation_errors] %>
+    <% if flash[:validation_errors] && !(controller_name == 'slack_message_templates' && ['new', 'edit'].include?(action_name)) %>
       <div class="alert alert-danger flash-message alert-dismissible fade show" role="alert">
         <h5 class="fw-bold"><%= pluralize(flash[:validation_errors].count, "件のエラー") %>があります:</h5>
         <ul class="mb-0">
@@ -225,7 +225,7 @@
         </ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-    <% end %>  
+    <% end %>
 
     <!-- メイン -->
     <main style="max-width: 3000px; margin: 0 auto; padding: 0 20px;">

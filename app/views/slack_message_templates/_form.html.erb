@@ -1,12 +1,12 @@
 <%= form_with model: @template, local: true do |f| %>
 
-  <!-- エラーメッセージ -->
-  <% if flash[:validation_errors] %>
+    <!-- エラーメッセージ -->
+  <% if @template.errors.any? %>
     <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
       <i class="fas fa-exclamation-triangle me-2"></i>
-      <h5 class="fw-bold"><%= pluralize(flash[:validation_errors].count, "件のエラー") %>があります:</h5>
+      <h5 class="fw-bold"><%= pluralize(@template.errors.count, "件のエラー") %>があります:</h5>
       <ul class="mb-0">
-        <% flash[:validation_errors].each do |message| %>
+        <% @template.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
       </ul>
