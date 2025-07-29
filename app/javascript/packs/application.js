@@ -11,9 +11,6 @@ ActiveStorage.start()
 import "bootstrap"
 import "../stylesheets/application"
 
-// Turboや通知JSなど（必要な場合）
-import "@hotwired/turbo-rails"
-
 // 通知ドロップダウンの機能
 function toggleNotifications() {
   const dropdown = document.getElementById('notificationDropdown');
