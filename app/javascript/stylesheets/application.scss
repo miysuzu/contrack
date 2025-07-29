@@ -836,3 +836,8 @@ html {
 }
 
 @import "header";
+
+body::before {
+  content: "webpacker-catch";
+  display: none;
+}
