@@ -25,11 +25,11 @@ company_names = %w(サンプリア会社 テスタス会社)
 company_names.each.with_index(1) do |company_name, i|
   company = Company.find_or_create_by!(name: company_name)
 
-  admin = Admin.find_or_create_by!(email: "admin_#{i}@example.com") do |a|
-    a.password = "password"
-    a.name = "#{company.name} 管理者#{i}"
-    a.company = company
-  end
+  admin = Admin.find_or_initialize_by(email: "admin_#{i}@example.com")
+  admin.password = "password"
+  admin.name = "#{company.name} 管理者#{i}"
+  admin.company = company
+  admin.save!  
 
   users_data = [
     { email: "yamada@example.com", name: "山田 太郎" },
@@ -38,14 +38,16 @@ company_names.each.with_index(1) do |company_name, i|
   ]
 
   users = users_data.map do |user_info|
-    User.find_or_create_by!(email: user_info[:email]) do |u|
-      u.name = user_info[:name]
-      u.password = "password"
-      u.password_confirmation = "password"
-      u.is_active = true
-      u.company = company
-    end
+    user = User.find_or_initialize_by(email: user_info[:email])
+    user.name = user_info[:name]
+    user.password = "password"
+    user.password_confirmation = "password"
+    user.is_active = true
+    user.company = company
+    user.save!
+    user
   end
+  
 
   group_names.each do |group_name|
     Group.find_or_create_by!(name: "#{company.name}_#{group_name}", company_id: company.id)
@@ -90,23 +92,26 @@ company_names.each.with_index(1) do |company_name, i|
     end
   end
 
-  template_texts = [
-    "契約書「#{contract_title}」が締結されました。関係者はご確認ください。",
-    "#{user_name} さんからコメントが追加されました：「#{comment_text}」",
-    "契約書「#{contract_title}」の承認をお願いします。現在のステータス：#{status_name}",
-    "契約書「#{contract_title}」が#{renewed_on}に更新予定です。ご対応をお願いします。",
-    "新しい契約書「#{contract_title}」が作成されました。初期ステータスは『#{status_name}』です。"
-  ]
-
   3.times do |j|
-    content = template_texts.sample
-    .gsub("contract_title", "○○契約書#{j + 1}")
-    .gsub("user_name", "山田 太郎")
-    .gsub("comment_text", "コメント本文の例です")
-    .gsub("status_name", ["下書き", "確認中", "締結済", "差し戻し"].sample)
-    .gsub("renewed_on", (Date.today + rand(15..90)).to_s)
+    contract_title = "○○契約書#{j + 1}"
+    user_name = "山田 太郎"
+    comment_text = "コメント本文の例です"
+    status_name = ["下書き", "確認中", "締結済", "差し戻し"].sample
+    renewed_on = (Date.today + rand(15..90)).to_s
 
-    SlackMessageTemplate.find_or_create_by!(admin: admin, company: company, content: content)
+    template_texts = [
+      "契約書「#{contract_title}」が締結されました。関係者はご確認ください。",
+      "#{user_name} さんからコメントが追加されました：「#{comment_text}」",
+      "契約書「#{contract_title}」の承認をお願いします。現在のステータス：#{status_name}",
+      "契約書「#{contract_title}」が#{renewed_on}に更新予定です。ご対応をお願いします。",
+      "新しい契約書「#{contract_title}」が作成されました。初期ステータスは『#{status_name}』です。"
+    ]
+
+    SlackMessageTemplate.find_or_create_by!(
+      admin: admin,
+      company: company,
+      content: template_texts.sample
+    )
   end
 end
 
