@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_07_30_073411) do
+ActiveRecord::Schema.define(version: 2025_07_30_172358) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -62,13 +62,17 @@ ActiveRecord::Schema.define(version: 2025_07_30_073411) do
 
   create_table "comment_notifications", force: :cascade do |t|
     t.integer "admin_id"
-    t.integer "comment_id", null: false
+    t.integer "comment_id"
     t.boolean "read", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "user_id"
+    t.text "message"
+    t.string "notifiable_type"
+    t.integer "notifiable_id"
     t.index ["admin_id"], name: "index_comment_notifications_on_admin_id"
     t.index ["comment_id"], name: "index_comment_notifications_on_comment_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_comment_notifications_on_notifiable"
     t.index ["user_id"], name: "index_comment_notifications_on_user_id"
   end
 

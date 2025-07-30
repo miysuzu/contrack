@@ -1,7 +1,8 @@
 class CommentNotification < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :admin, optional: true
-  belongs_to :comment
+  belongs_to :comment, optional: true
+  belongs_to :notifiable, polymorphic: true, optional: true
   
   validates :read, inclusion: { in: [true, false] }
   

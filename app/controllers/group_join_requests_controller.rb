@@ -2,8 +2,14 @@ class GroupJoinRequestsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    # 自分が作成したグループへの申請一覧
+    # 自分が作成したグループへの申請一覧のみ表示
     @requests = GroupJoinRequest.joins(:group).where(groups: { user_id: current_user.id }, status: :pending)
+    
+    # グループ作成者以外はアクセス不可
+    unless current_user.groups.where(user_id: current_user.id).exists?
+      redirect_to group_searches_path, alert: 'アクセス権限がありません。'
+      return
+    end
   end
 
   def create
@@ -32,6 +38,8 @@ class GroupJoinRequestsController < ApplicationController
       request.update(status: :approved)
       # 承認時にグループに所属させる
       GroupUser.create(user: request.user, group: request.group)
+      # 該当する通知を削除
+      CommentNotification.where(notifiable: request).destroy_all
       redirect_to group_join_requests_path, notice: '申請を承認しました。'
     else
       redirect_to group_join_requests_path, alert: '承認できません。'
@@ -47,6 +55,8 @@ class GroupJoinRequestsController < ApplicationController
     end
     if request.group.user_id == current_user.id && request.pending?
       request.update(status: :rejected)
+      # 該当する通知を削除
+      CommentNotification.where(notifiable: request).destroy_all
       redirect_to group_join_requests_path, notice: '申請を拒否しました。'
     else
       redirect_to group_join_requests_path, alert: '拒否できません。'

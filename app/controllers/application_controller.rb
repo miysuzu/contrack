@@ -43,8 +43,11 @@ class ApplicationController < ActionController::Base
     @expiring_contracts = user_contracts.where("expiration_date BETWEEN ? AND ?", Date.today, Date.today + 30)
     @renewal_contracts = user_contracts.where("renewal_date BETWEEN ? AND ?", Date.today, Date.today + 7)
     
-    # コメント通知を取得
+    # コメント通知とグループ参加申請通知を取得
     @comment_notifications = current_user.comment_notifications.unread.order(created_at: :desc).limit(10)
+    
+    # グループ参加申請の通知数を取得
+    @group_join_request_count = current_user.comment_notifications.unread.where(notifiable_type: 'GroupJoinRequest').count
     
     @notification_count = @expiring_contracts.size + @renewal_contracts.size + @comment_notifications.size
   end

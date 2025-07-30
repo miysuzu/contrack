@@ -111,15 +111,27 @@
               </h6>
               <% @comment_notifications.each do |notification| %>
                 <div class="notification-item">
-                  <div class="notification-title">
-                    <%= link_to notification.comment.contract.title, contract_path(notification.comment.contract), class: "text-decoration-none" %>
-                  </div>
-                  <div class="notification-detail">
-                    <%= notification.comment.commentable.name %>さんがコメントしました
-                    <small class="text-muted d-block">
-                      <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
-                    </small>
-                  </div>
+                  <% if notification.comment.present? %>
+                    <div class="notification-title">
+                      <%= link_to notification.comment.contract.title, contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                    </div>
+                    <div class="notification-detail">
+                      <%= notification.comment.commentable.name %>さんがコメントしました
+                      <small class="text-muted d-block">
+                        <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
+                      </small>
+                    </div>
+                  <% elsif notification.notifiable_type == 'GroupJoinRequest' %>
+                    <div class="notification-title">
+                      <%= link_to "グループ参加申請", group_join_requests_path, class: "text-decoration-none" %>
+                    </div>
+                    <div class="notification-detail">
+                      <%= notification.message %>
+                      <small class="text-muted d-block">
+                        <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
+                      </small>
+                    </div>
+                  <% end %>
                   <%= link_to "既読", mark_as_read_comment_notification_path(notification), method: :patch, class: "btn btn-sm btn-outline-secondary mt-1" %>
                 </div>
               <% end %>
@@ -173,8 +185,13 @@
           <%= link_to group_searches_path, class: "btn btn-outline-light fw-semibold" do %>
             <i class="fas fa-users me-2"></i> グループ検索・一覧
           <% end %>
-          <%= link_to group_join_requests_path, class: "btn btn-outline-light fw-semibold" do %>
+          <%= link_to group_join_requests_path, class: "btn btn-outline-light fw-semibold position-relative" do %>
             <i class="fas fa-user-plus me-2"></i> グループ参加申請一覧
+            <% if @group_join_request_count && @group_join_request_count > 0 %>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                <%= @group_join_request_count > 99 ? '99+' : @group_join_request_count %>
+              </span>
+            <% end %>
           <% end %>
           <%= link_to tags_path, class: "btn btn-outline-light fw-semibold" do %>
             <i class="fas fa-tags me-2"></i> タグ一覧
