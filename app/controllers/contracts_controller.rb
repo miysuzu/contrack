@@ -38,16 +38,18 @@ class ContractsController < ApplicationController
   
     # 並び順
     case params[:sort]
+    when "created_desc"
+      @contracts = @contracts.order(created_at: :desc)
     when "created_asc"
       @contracts = @contracts.order(created_at: :asc)
     when "updated_desc"
-      @contracts = @contracts.order(updated_at: :desc)
+      @contracts = @contracts.order(renewal_date: :desc, created_at: :desc)
     when "updated_asc"
-      @contracts = @contracts.order(updated_at: :asc)
+      @contracts = @contracts.order(renewal_date: :asc, created_at: :desc)
     when "expiration_asc"
-      @contracts = @contracts.order(expiration_date: :asc).where.not(expiration_date: nil)
+      @contracts = @contracts.order(expiration_date: :asc, created_at: :desc)
     when "expiration_desc"
-      @contracts = @contracts.order(expiration_date: :desc).where.not(expiration_date: nil)
+      @contracts = @contracts.order(expiration_date: :desc, created_at: :desc)
     when "title_asc"
       @contracts = @contracts.order(:title)
     else

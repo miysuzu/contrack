@@ -87,18 +87,27 @@ group_names.each do |group_name|
   puts "   グループ作成: #{group.name}"
 end
 
-# サンプリア会社のグループにユーザーを割り当て
+# サンプリア会社のグループにユーザーを明示的に割り当て
 puts " グループユーザー割り当て"
-sampuria_groups.each do |group|
-  selected_users = sampuria_users.sample(2)
-  selected_users.each do |user|
-    GroupUser.find_or_create_by!(user_id: user.id, group_id: group.id)
-  end
-  puts "   グループ #{group.name} に #{selected_users.count} 人のユーザーを割り当て"
-end
+sales_group = Group.find_by(name: "サンプリア会社_営業部")
+legal_group = Group.find_by(name: "サンプリア会社_法務部")
+accounting_group = Group.find_by(name: "サンプリア会社_経理部")
+
+GroupUser.find_or_create_by!(user_id: yamada.id, group_id: sales_group.id)
+GroupUser.find_or_create_by!(user_id: sato.id, group_id: sales_group.id)
+
+GroupUser.find_or_create_by!(user_id: sato.id, group_id: legal_group.id)
+GroupUser.find_or_create_by!(user_id: suzuki.id, group_id: legal_group.id)
+
+GroupUser.find_or_create_by!(user_id: yamada.id, group_id: accounting_group.id)
+GroupUser.find_or_create_by!(user_id: sato.id, group_id: accounting_group.id)
+GroupUser.find_or_create_by!(user_id: suzuki.id, group_id: accounting_group.id)
+
+puts "   グループ割り当て完了"
 
 # サンプリア会社の専用グループ作成
-sampuria_users.each do |user|
+puts " 専用グループ作成"
+[yamada, sato, suzuki].each do |user|
   personal_group = Group.find_or_create_by!(
     name: "#{user.name}専用",
     company_id: sampuria_company.id
@@ -107,7 +116,8 @@ sampuria_users.each do |user|
   puts " 専用グループ作成: #{personal_group.name}"
 end
 
-# 契約書の作成
+# 契約書の作成（各ユーザー7件ずつ、そのうち1件は更新日が1週間以内）
+puts " 契約書作成"
 contract_titles = [
   "業務委託契約書",
   "契約基本合意書",
@@ -130,17 +140,24 @@ contract_titles = [
 ]
 all_statuses = Status.all.to_a
 
-sampuria_users.each do |user|
-  3.times do |contract_index|
-          start_date = rand(6..12).months.ago.to_date
-      signed_on = start_date + rand(1..10).days
-      expiration_date = signed_on + rand(30..90).days
-      renewed_on = expiration_date + rand(15..60).days
+[yamada, sato, suzuki].each do |user|
+  # ユーザーが所属するグループIDを抽出
+  user_group_ids = user.groups.pluck(:id)
 
-    title = "#{contract_titles.sample}（#{user.name}）#{contract_index + 1}"
-    
-    selected_group = sampuria_groups.sample
-    
+  7.times do |i|
+    start_date = rand(6..12).months.ago.to_date
+    signed_on = start_date + rand(1..10).days
+    expiration_date = signed_on + rand(30..90).days
+
+    if i == 0
+      renewed_on = Time.zone.today + rand(1..6).days # 一週間以内の契約
+    else
+      renewed_on = expiration_date + rand(15..60).days
+    end
+
+    title = "#{contract_titles.sample}（#{user.name}）#{i + 1}"
+    selected_group_id = user_group_ids.sample
+
     contract = Contract.find_or_initialize_by(
       title: title,
       user_id: user.id
@@ -148,12 +165,12 @@ sampuria_users.each do |user|
     contract.body = "これは#{user.name}が作成した#{title}の本文です。契約条項、対象期間、義務などが記載されています。"
     contract.company_id = user.company_id
     contract.status = all_statuses.sample
-    contract.group_id = selected_group.id
+    contract.group_id = selected_group_id
     contract.conclusion_date = signed_on
     contract.expiration_date = expiration_date
     contract.renewal_date = renewed_on
     contract.save!
-    
+
     puts "   契約書作成: #{title}"
   end
 end

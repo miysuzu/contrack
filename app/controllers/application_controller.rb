@@ -37,11 +37,11 @@ class ApplicationController < ActionController::Base
   end
 
   def set_notifications
-    # ユーザーの会社に属する契約書を取得（admin_only: falseのもののみ）
-    company_contracts = Contract.where(company_id: current_user.company_id, admin_only: false)
+    # ユーザーが作成した契約書のみを取得（admin_only: falseまたはnilのもの）
+    user_contracts = current_user.contracts.where("admin_only IS NULL OR admin_only = ?", false)
     
-    @expiring_contracts = company_contracts.where("expiration_date BETWEEN ? AND ?", Date.today, Date.today + 30)
-    @renewal_contracts = company_contracts.where("renewal_date BETWEEN ? AND ?", Date.today, Date.today + 7)
+    @expiring_contracts = user_contracts.where("expiration_date BETWEEN ? AND ?", Date.today, Date.today + 30)
+    @renewal_contracts = user_contracts.where("renewal_date BETWEEN ? AND ?", Date.today, Date.today + 7)
     
     # コメント通知を取得
     @comment_notifications = current_user.comment_notifications.unread.order(created_at: :desc).limit(10)

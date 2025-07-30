@@ -213,7 +213,7 @@ ActiveRecord::Schema.define(version: 2025_07_30_073411) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "name"
-    t.boolean "is_active"
+    t.boolean "is_active", default: true
     t.boolean "admin"
     t.integer "company_id"
     t.index ["company_id"], name: "index_users_on_company_id"
