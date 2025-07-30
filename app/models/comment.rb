@@ -53,8 +53,8 @@ class Comment < ApplicationRecord
   end
   
   def create_notifications
-    # 契約書の所有者に通知を作成
-    if contract.user.present?
+    # 契約書の所有者に通知を作成（自分以外の場合）
+    if contract.user.present? && !(commentable.is_a?(User) && commentable == contract.user)
       CommentNotification.create!(
         user: contract.user,
         admin: commentable.is_a?(Admin) ? commentable : nil,
@@ -63,8 +63,8 @@ class Comment < ApplicationRecord
       )
     end
     
-    # 契約書の管理者に通知を作成（会員がコメントした場合）
-    if contract.admin.present? && commentable.is_a?(User)
+    # 契約書の管理者に通知を作成（会員がコメントした場合、かつ管理者が自分以外の場合）
+    if contract.admin.present? && commentable.is_a?(User) && contract.admin != commentable
       CommentNotification.create!(
         user: nil,
         admin: contract.admin,
@@ -73,16 +73,16 @@ class Comment < ApplicationRecord
       )
     end
     
-    # 親コメントの作成者に通知を作成（返信の場合）
+    # 親コメントの作成者に通知を作成（返信の場合、かつ自分以外の場合）
     if parent.present? && parent.commentable != commentable
-      if parent.commentable.is_a?(User)
+      if parent.commentable.is_a?(User) && parent.commentable != commentable
         CommentNotification.create!(
           user: parent.commentable,
           admin: commentable.is_a?(Admin) ? commentable : nil,
           comment: self,
           read: false
         )
-      elsif parent.commentable.is_a?(Admin)
+      elsif parent.commentable.is_a?(Admin) && parent.commentable != commentable
         CommentNotification.create!(
           user: commentable.is_a?(User) ? commentable : nil,
           admin: parent.commentable,
@@ -104,12 +104,15 @@ class Comment < ApplicationRecord
         )
       end
       
-      # 同じ契約書にコメントした他の管理者に通知を作成
+      # 同じ契約書にコメントした他の管理者に通知を作成（自分以外の場合）
       other_admins = contract.comments.where.not(commentable: commentable)
                              .where(commentable_type: 'Admin')
                              .distinct.pluck(:commentable_id)
       
       other_admins.each do |admin_id|
+        # 自分自身には通知を作成しない
+        next if admin_id == commentable.id
+        
         CommentNotification.create!(
           user: nil,
           admin_id: admin_id,

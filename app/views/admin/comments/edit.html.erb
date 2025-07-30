@@ -1,16 +1,20 @@
-<div class="container fade-in">
-  <div class="mb-4">
-    <h2>
-      <i class="fas fa-edit me-2"></i>メモ編集
+<!-- Heroセクション -->
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_admin.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h2 class="display-3 fw-bold" style="text-shadow: 0 2px 8px #0008;">
+      <i class="fas fa-edit me-3"></i>メモを編集（管理者）
     </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">メモの内容を編集できます</p>
   </div>
+</section>
 
-  <div class="card">
-    <div class="card-body">
+<main class="custom-wide-container fade-in" style="width: 100%; max-width: 1000px; margin: 48px auto 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
+  <div class="card shadow rounded-4 border-0">
+    <div class="card-body p-4">
       <%= form_with model: [@contract, @comment], local: true do |f| %>
         <% if @comment.errors.any? %>
           <div class="alert alert-danger">
-            <h6><%= pluralize(@comment.errors.count, "error") %> prohibited this comment from being saved:</h6>
+            <h4><%= @comment.errors.count %>件のエラーが発生しました</h4>
             <ul>
               <% @comment.errors.full_messages.each do |message| %>
                 <li><%= message %></li>
@@ -19,16 +23,18 @@
           </div>
         <% end %>
 
-        <div class="mb-3">
-          <%= f.label :content, 'メモ内容', class: 'form-label' %>
-          <%= f.text_area :content, class: 'form-control', rows: 4 %>
+        <div class="form-group mb-4">
+          <%= f.label :content, 'メモ内容', class: 'form-label fw-bold' %>
+          <%= f.text_area :content, class: 'form-control rounded-3 shadow-sm', rows: 6, placeholder: 'メモを入力してください...' %>
         </div>
 
-        <div class="d-flex gap-2">
-          <%= f.submit '更新', class: 'btn btn-primary' %>
-          <%= link_to 'キャンセル', admin_contract_path(@contract), class: 'btn btn-secondary' %>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+          <%= f.submit '更新', class: 'btn btn-primary px-4 rounded-pill shadow-sm' %>
+          <%= link_to admin_contract_path(@contract), class: 'btn btn-secondary px-4 rounded-pill shadow-sm' do %>
+            <i class="fas fa-times me-2"></i>キャンセル
+          <% end %>
         </div>
       <% end %>
     </div>
   </div>
-</div> 
+</main> 

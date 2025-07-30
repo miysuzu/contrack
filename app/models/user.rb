@@ -15,6 +15,9 @@ class User < ApplicationRecord
   # バリデーション
   validates :name, presence: true, length: { maximum: 50 }
 
+  # コールバック
+  before_create :set_default_is_active
+
   # 退会フラグのチェック（is_activeがfalseならログイン不可）
   def active_for_authentication?
     super && is_active != false
@@ -23,5 +26,11 @@ class User < ApplicationRecord
   # 退会済みアカウントのエラーメッセージ
   def inactive_message
     is_active == false ? :inactive_account : super
+  end
+
+  private
+
+  def set_default_is_active
+    self.is_active = true if is_active.nil?
   end
 end

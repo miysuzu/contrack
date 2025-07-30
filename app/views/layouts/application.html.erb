@@ -237,7 +237,7 @@
     </main>
 
     <!-- フッター -->
-    <footer class="bg-white border-top shadow-sm <%= (controller_name == 'sessions' && action_name == 'new') || (controller_name == 'registrations' && action_name == 'new') || (controller_name == 'passwords' && action_name == 'new') ? 'mt-0' : 'mt-5' %>">
+    <footer class="bg-white border-top shadow-sm <%= (controller_name == 'sessions' && action_name == 'new') || (controller_name == 'registrations' && action_name == 'new') || (controller_name == 'passwords' && ['new', 'edit'].include?(action_name)) ? 'mt-0' : 'mt-5' %>">
       <div class="container py-5">
         <div class="row text-muted small align-items-start">
     

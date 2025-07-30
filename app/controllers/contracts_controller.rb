@@ -8,8 +8,6 @@ class ContractsController < ApplicationController
   def index
     # 所属グループのIDのみ取得
     group_ids = current_user.groups.pluck(:id)
-    
-    Rails.logger.info "DEBUG: ユーザーID=#{current_user.id}, 所属グループID=#{group_ids}"
   
     # ビュー用：所属グループ一覧のみ
     @groups = current_user.groups
@@ -17,24 +15,15 @@ class ContractsController < ApplicationController
     # 選択されたグループが自分の所属グループか確認して取得
     @selected_group = current_user.groups.find_by(id: params[:group_id]) if params[:group_id].present?
   
-    # 契約書一覧（自分が作成 or 所属グループ or 管理者作成でadmin_only=false）＋ admin_only が true ではないもの
-    @contracts = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+    # 契約書一覧（自分が作成 or 所属グループの契約書）
+    @contracts = Contract.where(
       Contract.arel_table[:user_id].eq(current_user.id)
       .or(Contract.arel_table[:group_id].in(group_ids))
-      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
     )
-    
-    Rails.logger.info "DEBUG: admin_only=false の契約書数=#{@contracts.where(admin_only: false).count}"
-    Rails.logger.info "DEBUG: admin_only=NULL の契約書数=#{@contracts.where(admin_only: nil).count}"
-    Rails.logger.info "DEBUG: 管理者作成の契約書数=#{@contracts.where(user_id: nil).count}"
-    
-    Rails.logger.info "DEBUG: 取得された契約書数=#{@contracts.count}"
-    Rails.logger.info "DEBUG: 契約書一覧=#{@contracts.pluck(:id, :title, :user_id, :group_id, :admin_only)}"
   
     # 特定グループでさらに絞り込み（所属している場合のみ）
     if @selected_group
       @contracts = @contracts.where(group_id: @selected_group.id)
-      Rails.logger.info "グループフィルター適用: group_id=#{@selected_group.id}"
     end
   
     # キーワード検索
@@ -126,10 +115,9 @@ class ContractsController < ApplicationController
     group_ids = current_user.groups.pluck(:id)
 
     # slack_message も同様に、会員が見てよい契約書に限定
-    @contract = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+    @contract = Contract.where(
       Contract.arel_table[:user_id].eq(current_user.id)
       .or(Contract.arel_table[:group_id].in(group_ids))
-      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
     ).find(params[:id])
 
     message_type = params[:type] || 'default'
@@ -151,10 +139,9 @@ class ContractsController < ApplicationController
     group_ids = current_user.groups.pluck(:id)
 
     # show/edit/update/destroy で取得できる契約書も同じく絞り込み
-    @contract = Contract.where("admin_only IS NULL OR admin_only = ?", false).where(
+    @contract = Contract.where(
       Contract.arel_table[:user_id].eq(current_user.id)
       .or(Contract.arel_table[:group_id].in(group_ids))
-      .or(Contract.arel_table[:user_id].eq(nil).and(Contract.arel_table[:admin_only].eq(false)))
     ).find(params[:id])
   end
 

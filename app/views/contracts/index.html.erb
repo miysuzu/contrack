@@ -1,3 +1,47 @@
+<!-- カスタムCSS -->
+<style>
+.urgent-row {
+  background-color: #fff3cd !important;
+  border-left: 4px solid #ffc107 !important;
+}
+
+.urgent-row:hover {
+  background-color: #ffeaa7 !important;
+}
+
+.critical-row {
+  background-color: #f8d7da !important;
+  border-left: 4px solid #dc3545 !important;
+}
+
+.critical-row:hover {
+  background-color: #f5c6cb !important;
+}
+
+.expired-row {
+  background-color: #e2e3e5 !important;
+  border-left: 4px solid #6c757d !important;
+}
+
+.expired-row:hover {
+  background-color: #d6d8db !important;
+}
+
+.date-warning {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.date-soon {
+  color: #fd7e14;
+  font-weight: bold;
+}
+
+.date-normal {
+  color: #6c757d;
+}
+</style>
+
 <% if params[:keyword].present? || params[:tag].present? || params[:status_id].present? || params[:group_id].present? %>
   <section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_contract_list.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
     <div class="container text-center text-white">
@@ -144,6 +188,18 @@
             </h5>
             <span class="badge bg-secondary fs-6">全<%= @contracts.total_count %>件</span>
           </div>
+          
+          <!-- 日付警告の説明 -->
+          <div class="alert alert-info mb-3" role="alert">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-info-circle me-2"></i>
+              <div>
+                <strong>日付警告について：</strong>
+                <span class="text-danger ms-2"><i class="fas fa-exclamation-circle"></i> 7日以内</span>
+                <span class="text-warning ms-2"><i class="fas fa-clock"></i> 30日以内</span>
+              </div>
+            </div>
+          </div>
 
           <% if @contracts.any? %>
             <div class="table-responsive">
@@ -160,7 +216,7 @@
                 </thead>
                 <tbody>
                   <% @contracts.each do |contract| %>
-                    <tr>
+                    <tr class="<%= 'critical-row' if contract.expiration_urgent? || contract.renewal_urgent? %><%= 'urgent-row' if (contract.expiration_soon? || contract.renewal_soon?) && !contract.expiration_urgent? && !contract.renewal_urgent? %><%= 'expired-row' if contract.expired? %>">
                       <td>
                         <%= link_to contract.title, contract_path(contract), class: "fw-bold text-decoration-none text-primary" %>
                       </td>
@@ -190,13 +246,44 @@
                       </td>
                       <td>
                         <% if contract.conclusion_date && contract.expiration_date %>
-                          <%= contract.conclusion_date.strftime("%Y/%m/%d") %> ~ <%= contract.expiration_date.strftime("%Y/%m/%d") %>
+                          <%= contract.conclusion_date.strftime("%Y/%m/%d") %> ~ 
+                          <span class="<%= 'date-warning' if contract.expiration_urgent? %><%= 'date-soon' if contract.expiration_soon? && !contract.expiration_urgent? %><%= 'date-normal' if !contract.expiration_soon? %>">
+                            <%= contract.expiration_date.strftime("%Y/%m/%d") %>
+                            <% if contract.expiration_urgent? %>
+                              <i class="fas fa-exclamation-circle ms-1" title="7日以内に満了"></i>
+                            <% elsif contract.expiration_soon? %>
+                              <i class="fas fa-clock ms-1" title="30日以内に満了"></i>
+                            <% end %>
+                          </span>
+                        <% elsif contract.conclusion_date %>
+                          <%= contract.conclusion_date.strftime("%Y/%m/%d") %> ~
+                        <% elsif contract.expiration_date %>
+                          ~ 
+                          <span class="<%= 'date-warning' if contract.expiration_urgent? %><%= 'date-soon' if contract.expiration_soon? && !contract.expiration_urgent? %><%= 'date-normal' if !contract.expiration_soon? %>">
+                            <%= contract.expiration_date.strftime("%Y/%m/%d") %>
+                            <% if contract.expiration_urgent? %>
+                              <i class="fas fa-exclamation-circle ms-1" title="7日以内に満了"></i>
+                            <% elsif contract.expiration_soon? %>
+                              <i class="fas fa-clock ms-1" title="30日以内に満了"></i>
+                            <% end %>
+                          </span>
                         <% else %>
                           -
                         <% end %>
                       </td>
                       <td>
-                        <%= contract.renewal_date&.strftime("%Y/%m/%d") || "未設定" %>
+                        <% if contract.renewal_date.present? %>
+                          <span class="<%= 'date-warning' if contract.renewal_urgent? %><%= 'date-soon' if contract.renewal_soon? && !contract.renewal_urgent? %><%= 'date-normal' if !contract.renewal_soon? %>">
+                            <%= contract.renewal_date.strftime("%Y/%m/%d") %>
+                            <% if contract.renewal_urgent? %>
+                              <i class="fas fa-exclamation-circle ms-1" title="7日以内に更新予定"></i>
+                            <% elsif contract.renewal_soon? %>
+                              <i class="fas fa-clock ms-1" title="30日以内に更新予定"></i>
+                            <% end %>
+                          </span>
+                        <% else %>
+                          未設定
+                        <% end %>
                       </td>
                       <td class="text-end">
                         <div class="d-flex gap-2 justify-content-end">

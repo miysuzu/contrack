@@ -21,7 +21,7 @@
               </small>
             <% end %>
           </div>
-          <% if comment.commentable == current_user || contract.user == current_user %>
+          <% if comment.commentable == current_user || contract.user == current_user || current_admin.present? %>
             <div class="btn-group btn-group-sm">
               <%= link_to "編集", edit_contract_comment_path(contract, comment), 
                   class: "btn btn-outline-secondary btn-sm" %>

@@ -1,32 +1,40 @@
-<section class="hero-section bg-contracts">
-  <div class="container pt-5 text-center text-white">
-    <h2 class="display-3 fw-bold">メモを編集</h2>
+<!-- Heroセクション -->
+<section class="hero-section position-relative" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url(<%= asset_path 'background_contract_list.png' %>) center/cover no-repeat; min-height: 400px; display: flex; align-items: center; border-radius: 0 0 32px 32px;">
+  <div class="container text-center text-white">
+    <h2 class="display-3 fw-bold" style="text-shadow: 0 2px 8px #0008;">
+      <i class="fas fa-edit me-3"></i>メモを編集
+    </h2>
+    <p class="fs-5" style="text-shadow: 0 1px 4px #0006;">メモの内容を編集できます</p>
   </div>
 </section>
 
-<main class="container my-5">
-
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <%# --- 編集フォーム --- %>
-      <div class="card shadow-sm rounded-4 border-0">
-        <div class="card-body p-4">
-          <%= form_with model: [@contract, @comment], local: true do |f| %>
-            <div class="mb-4">
-              <%= f.label :content, "メモ内容", class: "form-label fw-semibold" %>
-              <%= f.text_area :content, class: "form-control rounded-3 shadow-sm", rows: 5, placeholder: "メモを入力してください..." %>
-            </div>
-            
-            <div class="d-flex gap-3 justify-content-center">
-              <%= f.submit "更新", class: "btn btn-primary px-4 rounded-pill shadow-sm" %>
-              <%= link_to @contract, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
-                <i class="fas fa-times me-2"></i>キャンセル
+<main class="custom-wide-container fade-in" style="width: 100%; max-width: 1000px; margin: 48px auto 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
+  <div class="card shadow rounded-4 border-0">
+    <div class="card-body p-4">
+      <%= form_with model: [@contract, @comment], local: true do |f| %>
+        <% if @comment.errors.any? %>
+          <div class="alert alert-danger">
+            <h4><%= @comment.errors.count %>件のエラーが発生しました</h4>
+            <ul>
+              <% @comment.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
               <% end %>
-            </div>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group mb-4">
+          <%= f.label :content, "メモ内容", class: "form-label fw-bold" %>
+          <%= f.text_area :content, class: "form-control rounded-3 shadow-sm", rows: 6, placeholder: "メモを入力してください..." %>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+          <%= f.submit "更新", class: "btn btn-primary px-4 rounded-pill shadow-sm" %>
+          <%= link_to @contract, class: "btn btn-secondary px-4 rounded-pill shadow-sm" do %>
+            <i class="fas fa-times me-2"></i>キャンセル
           <% end %>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
-
 </main>

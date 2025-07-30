@@ -17,6 +17,36 @@ class Contract < ApplicationRecord
   # 添付ファイルのバリデーション
   validate :acceptable_attachments
   
+  # 日付の判定メソッド
+  def expiration_soon?
+    return false unless expiration_date.present?
+    days_until_expiration = (expiration_date - Date.current).to_i
+    days_until_expiration <= 30 && days_until_expiration >= 0
+  end
+  
+  def expiration_urgent?
+    return false unless expiration_date.present?
+    days_until_expiration = (expiration_date - Date.current).to_i
+    days_until_expiration <= 7 && days_until_expiration >= 0
+  end
+  
+  def renewal_soon?
+    return false unless renewal_date.present?
+    days_until_renewal = (renewal_date - Date.current).to_i
+    days_until_renewal <= 30 && days_until_renewal >= 0
+  end
+  
+  def renewal_urgent?
+    return false unless renewal_date.present?
+    days_until_renewal = (renewal_date - Date.current).to_i
+    days_until_renewal <= 7 && days_until_renewal >= 0
+  end
+  
+  def expired?
+    return false unless expiration_date.present?
+    expiration_date < Date.current
+  end
+  
   private
   
   def acceptable_attachments

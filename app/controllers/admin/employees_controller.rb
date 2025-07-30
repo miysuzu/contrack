@@ -6,7 +6,7 @@ class Admin::EmployeesController < Admin::ApplicationController
   def create_invite
     email = params[:email]
     password = Devise.friendly_token.first(10)
-    user = User.new(email: email, name: '未設定', password: password, password_confirmation: password, company_id: current_admin.company_id)
+    user = User.new(email: email, name: '未設定', password: password, password_confirmation: password, company_id: current_admin.company_id, is_active: true)
     if user.save
       mail_body = <<~MAIL
         #{user.name || '従業員'}様
