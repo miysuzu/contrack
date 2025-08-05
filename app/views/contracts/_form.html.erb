@@ -15,12 +15,12 @@
     <%= form_with model: @contract, local: true, multipart: true do |f| %>
       <div class="form-group mb-3">
         <%= f.label :title, "契約タイトル", class: "form-label fw-bold" %>
-        <%= f.text_field :title, class: "form-control rounded-3 shadow-sm" %>
+        <%= f.text_field :title, class: "form-control rounded-3 shadow-sm", id: "contract_title" %>
       </div>
 
       <div class="form-group mb-3">
         <%= f.label :body, "契約内容", class: "form-label fw-bold" %>
-        <%= f.text_area :body, rows: 8, class: "form-control rounded-3 shadow-sm" %>
+        <%= f.text_area :body, rows: 8, class: "form-control rounded-3 shadow-sm", id: "contract_body" %>
       </div>
 
       <div class="form-group mb-3">
@@ -30,7 +30,7 @@
 
       <div class="form-group mb-3">
         <%= f.label :tag_list, "タグ（カンマ区切り）", class: "form-label fw-bold" %>
-        <%= f.text_field :tag_list, value: @contract.tag_list.join(", "), class: "form-control rounded-3 shadow-sm" %>
+        <%= f.text_field :tag_list, value: @contract.tag_list.join(", "), class: "form-control rounded-3 shadow-sm", id: "contract_tag_list" %>
       </div>
 
       <div class="form-group mb-3">
@@ -40,12 +40,12 @@
 
       <div class="form-group mb-3">
         <%= f.label :conclusion_date, "締結日", class: "form-label fw-bold" %>
-        <%= f.date_field :conclusion_date, class: "form-control rounded-3 shadow-sm" %>
+        <%= f.date_field :conclusion_date, class: "form-control rounded-3 shadow-sm", id: "contract_conclusion_date" %>
       </div>
 
       <div class="form-group mb-3">
         <%= f.label :expiration_date, "満了日", class: "form-label fw-bold" %>
-        <%= f.date_field :expiration_date, class: "form-control rounded-3 shadow-sm" %>
+        <%= f.date_field :expiration_date, class: "form-control rounded-3 shadow-sm", id: "contract_expiration_date" %>
       </div>
 
       <div class="form-group mb-3">
@@ -56,6 +56,12 @@
       <div class="form-group mb-3">
         <%= f.label :attachments, "添付ファイル", class: "form-label fw-bold" %>
         <%= f.file_field :attachments, multiple: true, class: "form-control rounded-3 shadow-sm", id: "file-input", accept: "image/*,.pdf,.doc,.docx,.xls,.xlsx" %>
+      </div>
+
+      <div class="text-end mb-4">
+        <button type="button" class="btn btn-outline-primary" id="ocr-button">
+          画像から自動入力する
+        </button>
       </div>
 
       <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
@@ -89,22 +95,19 @@
                       </div>
 
                       <% if attachment.content_type.start_with?('image/') %>
-                        <!-- 画像プレビュー -->
                         <div class="text-center mb-2">
-                          <img src="<%= rails_blob_url(attachment) %>" 
-                               class="img-fluid rounded" 
+                          <img src="<%= rails_blob_url(attachment) %>"
+                               class="img-fluid rounded"
                                style="max-height: 200px; max-width: 100%; object-fit: cover;"
                                alt="<%= attachment.filename %>">
                         </div>
                       <% elsif attachment.content_type.start_with?('application/pdf') %>
-                        <!-- PDFプレビュー -->
                         <div class="text-center mb-2">
                           <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-file-pdf text-danger fa-3x"></i>
                           </div>
                         </div>
                       <% else %>
-                        <!-- その他のファイル -->
                         <div class="text-center mb-2">
                           <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-file text-secondary fa-3x"></i>
@@ -112,9 +115,8 @@
                         </div>
                       <% end %>
 
-                      <!-- ダウンロードボタン -->
                       <div class="d-flex gap-2 flex-nowrap justify-content-between mt-2">
-                        <%= link_to rails_blob_path(attachment, disposition: "attachment"), 
+                        <%= link_to rails_blob_path(attachment, disposition: "attachment"),
                             class: "btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap" do %>
                           <i class="fas fa-download"></i><span>ダウンロード</span>
                         <% end %>
@@ -132,6 +134,8 @@
   </div>
 </div>
 
+
+
 <script>
 // ファイルプレビュー機能
 function initializeFilePreview() {
@@ -140,7 +144,6 @@ function initializeFilePreview() {
   
   // 要素が見つからない場合は処理を終了
   if (!fileInput || !previewContainer) {
-    console.log('File input or preview container not found');
     return;
   }
   
@@ -250,15 +253,145 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// 初期化を複数のタイミングで実行
-document.addEventListener('DOMContentLoaded', initializeFilePreview);
-document.addEventListener('turbo:load', initializeFilePreview);
-document.addEventListener('turbo:render', initializeFilePreview);
+// OCR機能の初期化
+function initializeOCR() {
+  const ocrButton = document.getElementById('ocr-button');
+  const fileInput = document.getElementById('file-input');
 
-// 即座にも実行（DOMが既に読み込まれている場合）
+  if (!ocrButton || !fileInput) {
+    return;
+  }
+
+  // OCRボタンのクリックイベント
+  ocrButton.addEventListener('click', handleOCRClick);
+}
+
+// OCRボタンクリック時の処理
+function handleOCRClick() {
+  const fileInput = document.getElementById('file-input');
+  const files = fileInput.files;
+  
+  if (!files || files.length === 0) {
+    alert('画像ファイルを選択してください');
+    return;
+  }
+
+  const combinedText = [];
+  const tagList = new Set();
+  const titles = [];
+  const conclusionDates = [];
+  const expirationDates = [];
+  let currentIndex = 0;
+
+  // レスポンス処理
+  function handleResponse(data) {
+    
+    if (data.body) combinedText.push(data.body);
+    if (data.tags && data.tags.length > 0) data.tags.forEach(tag => tagList.add(tag));
+    if (data.title) titles.push(data.title);
+    if (data.conclusion_date) conclusionDates.push(data.conclusion_date);
+    if (data.expiration_date) expirationDates.push(data.expiration_date);
+
+    if (currentIndex < files.length - 1) {
+      currentIndex++;
+      sendFile(files[currentIndex]);
+    } else {
+      // 契約内容を自動入力
+      const bodyField = document.querySelector('#contract_body');
+      if (bodyField && combinedText.length > 0) {
+        bodyField.value = combinedText.join('\n\n---------- 改ページ ----------\n\n');
+      }
+      
+      // タグを自動入力
+      const tagField = document.querySelector('#contract_tag_list');
+      if (tagField && tagList.size > 0) {
+        tagField.value = Array.from(tagList).join(', ');
+      }
+      
+      // タイトルを自動入力
+      const titleField = document.querySelector('#contract_title');
+      if (titleField && titles.length > 0) {
+        titleField.value = titles[0];
+      }
+      
+      // 締結日を自動入力
+      const conclusionField = document.querySelector('#contract_conclusion_date');
+      if (conclusionField && conclusionDates.length > 0) {
+        conclusionField.value = conclusionDates[0];
+      }
+      
+      // 満了日を自動入力
+      const expirationField = document.querySelector('#contract_expiration_date');
+      if (expirationField && expirationDates.length > 0) {
+        expirationField.value = expirationDates[0];
+      }
+    }
+  }
+
+  // ファイル送信処理
+  function sendFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // CSRFトークンを安全に取得
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrfToken) {
+      alert('セキュリティトークンが見つかりません。ページを再読み込みしてください。');
+      return;
+    }
+
+    fetch('/contracts/ocr_preview', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': csrfToken
+      },
+      body: formData
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          alert(`OCR失敗: ${data.error}`);
+        } else {
+          handleResponse(data);
+        }
+      })
+      .catch(error => {
+        alert(`OCR通信中にエラーが発生しました: ${error.message}`);
+      });
+  }
+
+  // 最初のファイルを送信
+  sendFile(files[currentIndex]);
+}
+
+// ページ読み込み時の初期化
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeFilePreview);
+  document.addEventListener('DOMContentLoaded', initializeOCR);
+} else {
+  initializeOCR();
+}
+
+// 初期化処理
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeFilePreview();
+    initializeOCR();
+  });
 } else {
   initializeFilePreview();
+  initializeOCR();
 }
+
+// Turbolinks対応
+document.addEventListener('turbolinks:load', () => {
+  initializeFilePreview();
+  initializeOCR();
+});
+
+
 </script>

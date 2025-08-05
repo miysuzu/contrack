@@ -74,7 +74,6 @@ class Admin::ContractsController < Admin::ApplicationController
     contract_params_with_admin = contract_params
   
     if params[:contract][:user_id]&.start_with?('admin_')
-      Rails.logger.info "DEBUG: 管理者による作成 - user_id を nil に設定"
       contract_params_with_admin[:user_id] = nil
     end
   
@@ -86,10 +85,8 @@ class Admin::ContractsController < Admin::ApplicationController
       @contract.admin_only = params[:contract][:admin_only] == '1'
     end
   
-    @contract.company = current_admin.company if current_admin.company
-  
-    Rails.logger.info "DEBUG: user_id=#{@contract.user_id.inspect}, admin_id=#{@contract.admin_id.inspect}"
-  
+        @contract.company = current_admin.company if current_admin.company
+
     if @contract.save
       redirect_to admin_contract_path(@contract), notice: "契約書を作成しました。"
     else
@@ -150,6 +147,39 @@ class Admin::ContractsController < Admin::ApplicationController
     message_type = params[:type] || 'default'
     slack_message = generate_slack_message_for_contract(@contract, message_type)
     render plain: slack_message
+  end
+
+  def ocr_preview
+    if params[:file].blank?
+      render json: { error: 'ファイルが選択されていません' }, status: :bad_request
+      return
+    end
+
+    begin
+      # 画像からテキストを抽出
+      extracted_text = Vision.get_text_from_image(params[:file])
+      
+      if extracted_text.blank?
+        render json: { error: 'テキストを抽出できませんでした' }, status: :unprocessable_entity
+        return
+      end
+
+      # 契約情報を自動抽出
+      analyzer = ContractAnalyzer.new(extracted_text)
+      
+      result = {
+        body: extracted_text,
+        title: analyzer.extract_title,
+        tags: analyzer.extract_tags,
+        conclusion_date: analyzer.extract_conclusion_date&.strftime('%Y-%m-%d'),
+        expiration_date: analyzer.extract_expiration_date&.strftime('%Y-%m-%d')
+      }
+
+      render json: result
+    rescue => e
+      Rails.logger.error("OCR Preview Error: #{e.message}")
+      render json: { error: "OCR処理中にエラーが発生しました: #{e.message}" }, status: :internal_server_error
+    end
   end
 
   private

@@ -78,7 +78,46 @@ class ContractsController < ApplicationController
     # ログイン中のユーザーに紐づけて契約書を作成
     @contract = current_user.contracts.build(contract_params)
     @contract.company = current_user.company if current_user.company
-
+  
+    # 🔽 Google Cloud Vision APIを使って画像から本文を抽出する（複数対応）
+    # 添付画像が存在する場合、それぞれの画像を順にOCRし、本文に結合する
+    if params[:contract][:attachments].present?
+      combined_text = ""
+  
+      params[:contract][:attachments].each_with_index do |image, index|
+        begin
+          extracted_text = Vision.get_text_from_image(image)
+          if extracted_text.present?
+            combined_text << "【ページ#{index + 1}】\n"
+            combined_text << extracted_text
+            combined_text << "\n\n---------- 改ページ ----------\n\n"
+          end
+        rescue => e
+          Rails.logger.error("Vision API エラー: #{e.message}")
+          flash.now[:alert] = "一部の画像の読み取りに失敗しました。"
+        end
+      end
+  
+      if combined_text.present?
+        @contract.body = combined_text
+  
+        # 🔽 OCRされたテキストから契約情報を自動抽出する
+        analyzer = ContractAnalyzer.new(combined_text)
+  
+        # 契約タイトルを抽出（例：「秘密保持契約書」など）
+        @contract.title = analyzer.extract_title if analyzer.extract_title
+  
+        # 締結日（開始日）を抽出
+        @contract.conclusion_date = analyzer.extract_conclusion_date
+  
+        # 満了日（終了日）を抽出
+        @contract.expiration_date = analyzer.extract_expiration_date
+  
+        # タグ（キーワード）を抽出し、tag_listにセット
+        @contract.tag_list = analyzer.extract_tags if analyzer.extract_tags.any?
+      end
+    end
+  
     if @contract.save
       if params[:contract][:shared_user_ids]
         @contract.shared_user_ids = params[:contract][:shared_user_ids].reject(&:blank?)
@@ -88,7 +127,7 @@ class ContractsController < ApplicationController
       @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
       render :new
     end
-  end
+  end  
 
   def edit
     @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
@@ -111,6 +150,39 @@ class ContractsController < ApplicationController
   def destroy
     @contract.destroy
     redirect_to contracts_path, notice: "契約書を削除しました。"
+  end
+
+  def ocr_preview
+    if params[:file].blank?
+      render json: { error: 'ファイルが選択されていません' }, status: :bad_request
+      return
+    end
+
+    begin
+      # 画像からテキストを抽出
+      extracted_text = Vision.get_text_from_image(params[:file])
+      
+      if extracted_text.blank?
+        render json: { error: 'テキストを抽出できませんでした' }, status: :unprocessable_entity
+        return
+      end
+
+      # 契約情報を自動抽出
+      analyzer = ContractAnalyzer.new(extracted_text)
+      
+      result = {
+        body: extracted_text,
+        title: analyzer.extract_title,
+        tags: analyzer.extract_tags,
+        conclusion_date: analyzer.extract_conclusion_date&.strftime('%Y-%m-%d'),
+        expiration_date: analyzer.extract_expiration_date&.strftime('%Y-%m-%d')
+      }
+
+      render json: result
+    rescue => e
+      Rails.logger.error("OCR Preview Error: #{e.message}")
+      render json: { error: "OCR処理中にエラーが発生しました: #{e.message}" }, status: :internal_server_error
+    end
   end
 
   def slack_message

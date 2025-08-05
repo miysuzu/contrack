@@ -158,10 +158,9 @@ module SlackMessageHelper
   def contract_url(contract)
     # 管理者側のコントローラーから呼び出された場合は管理者側のURLを生成
     if controller_path.start_with?('admin/')
-      "http://localhost:3000/admin/contracts/#{contract.id}"
+      Rails.application.routes.url_helpers.admin_contract_url(contract, host: request.host_with_port)
     else
-      # 本番環境では実際のドメインに変更
-      "http://localhost:3000/contracts/#{contract.id}"
+      Rails.application.routes.url_helpers.contract_url(contract, host: request.host_with_port)
     end
   end
 end 

@@ -87,6 +87,6 @@ class SlackMessageTemplatesController < ApplicationController
   end
 
   def contract_url(contract)
-    "http://localhost:3000/contracts/#{contract.id}"
+    Rails.application.routes.url_helpers.contract_url(contract)
   end
 end 

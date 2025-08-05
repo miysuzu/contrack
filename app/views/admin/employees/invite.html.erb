@@ -21,7 +21,7 @@
           <%= form_with url: create_invite_admin_employees_path, method: :post, local: true do |f| %>
             <div class="form-group mb-3">
               <%= label_tag :email, "従業員のメールアドレス", class: "form-label fw-bold" %>
-              <%= email_field_tag :email, nil, class: "form-control rounded-3 shadow-sm", required: true, placeholder: "example@company.com" %>
+              <%= email_field_tag :email, nil, class: "form-control rounded-3 shadow-sm", required: true, placeholder: "employee@company.com" %>
             </div>
             
             <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">

@@ -90,6 +90,6 @@ class Admin::SlackMessageTemplatesController < Admin::ApplicationController
   end
 
   def admin_contract_url(contract)
-    "http://localhost:3000/admin/contracts/#{contract.id}"
+    Rails.application.routes.url_helpers.admin_contract_url(contract)
   end
 end 

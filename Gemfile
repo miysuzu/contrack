@@ -72,3 +72,5 @@ gem "net-pop"
 gem "net-imap"
 
 gem 'kaminari'
+
+gem 'dotenv-rails'
