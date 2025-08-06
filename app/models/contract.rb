@@ -17,6 +17,29 @@ class Contract < ApplicationRecord
   # 添付ファイルのバリデーション
   validate :acceptable_attachments
   
+  def conclusion_date
+    contract_start_date
+  end
+  
+  def conclusion_date=(value)
+    self.contract_start_date = value
+  end
+  
+  # データ型の確実な変換
+  def contract_start_date
+    value = read_attribute(:contract_start_date)
+    return nil if value.nil?
+    return value if value.is_a?(Date)
+    Date.parse(value.to_s) rescue nil
+  end
+  
+  def contract_conclusion_date
+    value = read_attribute(:contract_conclusion_date)
+    return nil if value.nil?
+    return value if value.is_a?(Date)
+    Date.parse(value.to_s) rescue nil
+  end
+  
   # 日付の判定メソッド
   def expiration_soon?
     return false unless expiration_date.present?

@@ -58,10 +58,10 @@
                     <% end %>
                   </td>
                   <td>
-                    <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
-                      <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ～ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
-                    <% elsif contract.conclusion_date.present? %>
-                      <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ～
+                    <% if contract.contract_start_date.present? && contract.expiration_date.present? %>
+                      <%= contract.contract_start_date.strftime('%Y/%m/%d') %> ～ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
+                    <% elsif contract.contract_start_date.present? %>
+                      <%= contract.contract_start_date.strftime('%Y/%m/%d') %> ～
                     <% elsif contract.expiration_date.present? %>
                       ～ <%= contract.expiration_date.strftime('%Y/%m/%d') %>
                     <% else %>

@@ -170,11 +170,14 @@ class ContractsController < ApplicationController
       # 契約情報を自動抽出
       analyzer = ContractAnalyzer.new(extracted_text)
       
+
+      
       result = {
         body: extracted_text,
         title: analyzer.extract_title,
         tags: analyzer.extract_tags,
-        conclusion_date: analyzer.extract_conclusion_date&.strftime('%Y-%m-%d'),
+        contract_start_date: analyzer.extract_contract_start_date&.strftime('%Y-%m-%d'),
+        contract_conclusion_date: analyzer.extract_contract_conclusion_date&.strftime('%Y-%m-%d'),
         expiration_date: analyzer.extract_expiration_date&.strftime('%Y-%m-%d')
       }
 
@@ -231,7 +234,7 @@ class ContractsController < ApplicationController
   def contract_params
     params.require(:contract).permit(
       :title, :body, :status_id, :tag_list,
-      :expiration_date, :renewal_date, :group_id, :conclusion_date,
+      :expiration_date, :renewal_date, :group_id, :contract_start_date, :contract_conclusion_date,
       attachments: []
     )
   end

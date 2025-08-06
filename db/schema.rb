@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_07_30_172358) do
+ActiveRecord::Schema.define(version: 2025_08_06_194158) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -115,10 +115,11 @@ ActiveRecord::Schema.define(version: 2025_07_30_172358) do
     t.date "expiration_date"
     t.date "renewal_date"
     t.integer "group_id"
-    t.date "conclusion_date"
+    t.date "contract_start_date"
     t.integer "company_id", null: false
     t.boolean "admin_only"
     t.integer "admin_id"
+    t.date "contract_conclusion_date"
     t.index ["admin_id"], name: "index_contracts_on_admin_id"
     t.index ["company_id"], name: "index_contracts_on_company_id"
     t.index ["group_id"], name: "index_contracts_on_group_id"

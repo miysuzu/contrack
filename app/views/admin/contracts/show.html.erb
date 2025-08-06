@@ -77,10 +77,10 @@
         </div>
         <div class="col-md-6">
           <div class="d-flex align-items-center mb-3">
-            <i class="fas fa-handshake me-3 text-success fa-lg"></i>
+            <i class="fas fa-handshake me-3 text-primary fa-lg"></i>
             <div>
               <strong class="text-dark">契約締結日</strong><br>
-              <%= @contract.conclusion_date.present? ? @contract.conclusion_date.strftime('%Y年%m月%d日') : '未設定' %>
+              <%= @contract.contract_conclusion_date.present? ? @contract.contract_conclusion_date.strftime('%Y年%m月%d日') : '未設定' %>
             </div>
           </div>
         </div>
@@ -88,25 +88,38 @@
       <div class="row mb-4">
         <div class="col-md-6">
           <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-calendar-check me-3 text-success fa-lg"></i>
+            <div>
+              <strong class="text-dark">契約開始日</strong><br>
+              <%= @contract.contract_start_date.present? ? @contract.contract_start_date.strftime('%Y年%m月%d日') : '未設定' %>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center mb-3">
             <i class="fas fa-calendar-times me-3 text-danger fa-lg"></i>
             <div>
-              <strong class="text-dark">満了日</strong><br>
+              <strong class="text-dark">契約満了日</strong><br>
               <span class="<%= 'text-danger fw-bold' if @contract.expiration_date.present? && @contract.expiration_date <= Date.today + 30 %>">
                 <%= @contract.expiration_date.present? ? @contract.expiration_date.strftime('%Y年%m月%d日') : '未設定' %>
               </span>
             </div>
           </div>
         </div>
+      </div>
+      <div class="row mb-4">
         <div class="col-md-6">
           <div class="d-flex align-items-center mb-3">
             <i class="fas fa-calendar-plus me-3 text-primary fa-lg"></i>
             <div>
-              <strong class="text-dark">更新日</strong><br>
+              <strong class="text-dark">契約更新日</strong><br>
               <%= @contract.renewal_date.present? ? @contract.renewal_date.strftime('%Y年%m月%d日') : '未設定' %>
             </div>
           </div>
         </div>
       </div>
+
+
 
       <% if @contract.tags.any? %>
         <div class="mb-4">

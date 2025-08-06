@@ -79,10 +79,12 @@
                 options_for_select([
                   ["作成日順（新しい順）", "created_desc"],
                   ["作成日順（古い順）", "created_asc"],
-                  ["更新日順（新しい順）", "updated_desc"],
-                  ["更新日順（古い順）", "updated_asc"],
-                  ["満了日順（近い順）", "expiration_asc"],
-                  ["満了日順（遠い順）", "expiration_desc"],
+                  ["契約更新日順（新しい順）", "updated_desc"],
+                  ["契約更新日順（古い順）", "updated_asc"],
+                  ["契約開始日順（近い順）", "contract_start_date_asc"],
+                  ["契約開始日順（遠い順）", "contract_start_date_desc"],
+                  ["契約満了日順（近い順）", "expiration_asc"],
+                  ["契約満了日順（遠い順）", "expiration_desc"],
                   ["タイトル順", "title_asc"]
                 ], params[:sort] || "created_desc"),
                 class: "form-select" %>
@@ -263,8 +265,8 @@
                         <% end %>
                       </td>
                       <td>
-                        <% if contract.conclusion_date.present? && contract.expiration_date.present? %>
-                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~ 
+                        <% if contract.contract_start_date.present? && contract.expiration_date.present? %>
+                          <%= contract.contract_start_date.strftime('%Y/%m/%d') %> ~ 
                           <span class="<%= 'date-warning' if contract.expiration_urgent? %><%= 'date-soon' if contract.expiration_soon? && !contract.expiration_urgent? %><%= 'date-normal' if !contract.expiration_soon? %>">
                             <%= contract.expiration_date.strftime('%Y/%m/%d') %>
                             <% if contract.expiration_urgent? %>
@@ -273,8 +275,8 @@
                               <i class="fas fa-clock ms-1" title="30日以内に満了"></i>
                             <% end %>
                           </span>
-                        <% elsif contract.conclusion_date.present? %>
-                          <%= contract.conclusion_date.strftime('%Y/%m/%d') %> ~
+                        <% elsif contract.contract_start_date.present? %>
+                          <%= contract.contract_start_date.strftime('%Y/%m/%d') %> ~
                         <% elsif contract.expiration_date.present? %>
                           ~ 
                           <span class="<%= 'date-warning' if contract.expiration_urgent? %><%= 'date-soon' if contract.expiration_soon? && !contract.expiration_urgent? %><%= 'date-normal' if !contract.expiration_soon? %>">

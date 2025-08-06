@@ -67,6 +67,8 @@ class SlackMessageTemplatesController < ApplicationController
     content = content.gsub('{{status}}', contract.status.name)
     content = content.gsub('{{expiration_date}}', contract.expiration_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{renewal_date}}', contract.renewal_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_start_date}}', contract.contract_start_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_conclusion_date}}', contract.contract_conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{conclusion_date}}', contract.conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{group_name}}', contract.group&.name || '未設定')
     content = content.gsub('{{tags}}', contract.tag_list.present? ? contract.tag_list.map { |tag| "##{tag}" }.join(' ') : 'なし')
