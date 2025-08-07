@@ -92,6 +92,16 @@
                     <% end %>
                   </li>
                   <li>
+                    <%= link_to admin_group_join_requests_path, class: "dropdown-item position-relative" do %>
+                      <i class="fas fa-user-plus me-2"></i>グループ参加申請一覧
+                      <% if @group_join_request_count && @group_join_request_count > 0 %>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                          <%= @group_join_request_count > 99 ? '99+' : @group_join_request_count %>
+                        </span>
+                      <% end %>
+                    <% end %>
+                  </li>
+                  <li>
                     <%= link_to admin_slack_message_templates_path, class: "dropdown-item" do %>
                       <i class="fas fa-comment-dots me-2"></i>Slackテンプレート
                     <% end %>
@@ -172,29 +182,41 @@
           <% if @comment_notifications&.any? %>
             <div class="notification-section">
               <h6 class="text-warning mb-2">
-                <i class="fas fa-comment me-1"></i>コメント通知
+                <i class="fas fa-comment me-1"></i>コメント・グループ参加申請通知
               </h6>
               <% @comment_notifications.each do |notification| %>
                 <div class="notification-item">
-                  <div class="notification-title">
-                    <% if notification.comment.contract&.title.present? %>
-                      <%= link_to notification.comment.contract.title, admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
-                    <% else %>
-                      <%= link_to "タイトルなしの契約書", admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
-                    <% end %>
-                  </div>
-                  <div class="notification-detail">
-                    <% if notification.comment.commentable&.respond_to?(:name) %>
-                      <%= notification.comment.commentable.name %>さんがコメントしました
-                    <% elsif notification.comment.commentable&.respond_to?(:email) %>
-                      <%= notification.comment.commentable.email %>さんがコメントしました
-                    <% else %>
-                      不明なユーザーがコメントしました
-                    <% end %>
-                    <small class="text-muted d-block">
-                      <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
-                    </small>
-                  </div>
+                  <% if notification.comment.present? %>
+                    <div class="notification-title">
+                      <% if notification.comment.contract&.title.present? %>
+                        <%= link_to notification.comment.contract.title, admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                      <% else %>
+                        <%= link_to "タイトルなしの契約書", admin_contract_path(notification.comment.contract), class: "text-decoration-none" %>
+                      <% end %>
+                    </div>
+                    <div class="notification-detail">
+                      <% if notification.comment.commentable&.respond_to?(:name) %>
+                        <%= notification.comment.commentable.name %>さんがコメントしました
+                      <% elsif notification.comment.commentable&.respond_to?(:email) %>
+                        <%= notification.comment.commentable.email %>さんがコメントしました
+                      <% else %>
+                        不明なユーザーがコメントしました
+                      <% end %>
+                      <small class="text-muted d-block">
+                        <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
+                      </small>
+                    </div>
+                  <% elsif notification.notifiable_type == 'GroupJoinRequest' %>
+                    <div class="notification-title">
+                      <%= link_to "グループ参加申請", admin_group_join_requests_path, class: "text-decoration-none" %>
+                    </div>
+                    <div class="notification-detail">
+                      <%= notification.message %>
+                      <small class="text-muted d-block">
+                        <%= notification.created_at.strftime('%Y/%m/%d %H:%M') %>
+                      </small>
+                    </div>
+                  <% end %>
                   <%= button_to "既読", mark_as_read_admin_comment_notification_path(notification), method: :patch, class: "btn btn-sm btn-outline-secondary mt-1", form: { style: "display: inline;" } %>
                 </div>
               <% end %>

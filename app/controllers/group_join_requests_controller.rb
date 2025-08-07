@@ -38,8 +38,19 @@ class GroupJoinRequestsController < ApplicationController
       request.update(status: :approved)
       # 承認時にグループに所属させる
       GroupUser.create(user: request.user, group: request.group)
-      # 該当する通知を削除
-      CommentNotification.where(notifiable: request).destroy_all
+      
+      # 申請者に承認通知を送信
+      CommentNotification.create!(
+        user: request.user,
+        admin: nil,
+        comment: nil,
+        notifiable: request,
+        message: "グループ「#{request.group.name}」への参加申請が承認されました",
+        read: false
+      )
+      
+      # グループ作成者が受け取った申請通知を削除（申請者への通知は残す）
+      CommentNotification.where(notifiable: request, user: current_user).destroy_all
       redirect_to group_join_requests_path, notice: '申請を承認しました。'
     else
       redirect_to group_join_requests_path, alert: '承認できません。'
@@ -55,8 +66,19 @@ class GroupJoinRequestsController < ApplicationController
     end
     if request.group.user_id == current_user.id && request.pending?
       request.update(status: :rejected)
-      # 該当する通知を削除
-      CommentNotification.where(notifiable: request).destroy_all
+      
+      # 申請者に拒否通知を送信
+      CommentNotification.create!(
+        user: request.user,
+        admin: nil,
+        comment: nil,
+        notifiable: request,
+        message: "グループ「#{request.group.name}」への参加申請が拒否されました",
+        read: false
+      )
+      
+      # グループ作成者が受け取った申請通知を削除（申請者への通知は残す）
+      CommentNotification.where(notifiable: request, user: current_user).destroy_all
       redirect_to group_join_requests_path, notice: '申請を拒否しました。'
     else
       redirect_to group_join_requests_path, alert: '拒否できません。'
@@ -65,10 +87,16 @@ class GroupJoinRequestsController < ApplicationController
 
   def destroy
     request = GroupJoinRequest.find(params[:id])
-    # 自分の申請のみ取り消し可能
-    if request.user_id == current_user.id && request.pending?
+    # 自分の申請のみ取り消し可能（pendingまたはrejected）
+    if request.user_id == current_user.id && (request.pending? || request.rejected?)
+      # 該当する通知を削除
+      CommentNotification.where(notifiable: request).destroy_all
       request.destroy
-      redirect_to group_searches_path, notice: '申請を取り消しました。'
+      if request.rejected?
+        redirect_to group_searches_path, notice: '拒否された申請を削除しました。再度申請できます。'
+      else
+        redirect_to group_searches_path, notice: '申請を取り消しました。'
+      end
     else
       redirect_to group_searches_path, alert: '申請を取り消せません。'
     end

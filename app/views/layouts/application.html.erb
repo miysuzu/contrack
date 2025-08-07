@@ -123,7 +123,7 @@
                     </div>
                   <% elsif notification.notifiable_type == 'GroupJoinRequest' %>
                     <div class="notification-title">
-                      <%= link_to "グループ参加申請", group_join_requests_path, class: "text-decoration-none" %>
+                      <%= link_to "グループ参加申請", group_searches_path, class: "text-decoration-none" %>
                     </div>
                     <div class="notification-detail">
                       <%= notification.message %>

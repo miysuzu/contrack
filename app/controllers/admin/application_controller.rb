@@ -26,8 +26,11 @@ class Admin::ApplicationController < ApplicationController
                                   .order(:renewal_date)
                                   .limit(10)
 
-      # コメント通知を取得
+      # コメント通知とグループ参加申請通知を取得
       @comment_notifications = current_admin.comment_notifications.unread.order(created_at: :desc).limit(10)
+      
+      # グループ参加申請の通知数を取得
+      @group_join_request_count = current_admin.comment_notifications.unread.where(notifiable_type: 'GroupJoinRequest').count
       
       # 通知件数
       @notification_count = @expiring_contracts.count + @renewal_contracts.count + @comment_notifications.count

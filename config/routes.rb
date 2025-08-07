@@ -20,6 +20,12 @@ Rails.application.routes.draw do
     resources :statuses, only: [:index, :create, :destroy, :edit, :update]
     resources :tags, only: [:index, :show, :destroy]
     resources :groups, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    resources :group_join_requests, only: [:index] do
+      member do
+        post :approve
+        post :reject
+      end
+    end
     resources :employees do
       collection do
         get :invite

@@ -122,6 +122,10 @@ class GroupsController < ApplicationController
     end
     if @group.users.include?(current_user)
       @group.users.delete(current_user)
+      
+      # グループ脱退時にGroupJoinRequestレコードも削除
+      GroupJoinRequest.where(user: current_user, group: @group).destroy_all
+      
       redirect_to group_searches_path, notice: 'グループから脱退しました。'
     else
       redirect_to group_searches_path, alert: 'このグループには所属していません。'

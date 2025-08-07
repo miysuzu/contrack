@@ -103,9 +103,11 @@
             <span class="badge bg-danger d-flex align-items-center gap-1 px-3 py-2">
               <i class="fas fa-times-circle"></i><span>拒否されました</span>
             </span>
-            <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" disabled>
-              <i class="fas fa-ban"></i><span>申請不可</span>
-            </button>
+            <%= form_with url: group_join_request_path(join_request), method: :delete, local: true, class: 'd-inline' do %>
+              <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" data-confirm="拒否された申請を削除して再度申請しますか？">
+                <i class="fas fa-redo"></i><span>再度申請</span>
+              </button>
+            <% end %>
           <% else %>
             <%= form_with url: group_join_requests_path, method: :post, local: true, class: 'd-inline' do %>
               <%= hidden_field_tag :group_id, group.id %>

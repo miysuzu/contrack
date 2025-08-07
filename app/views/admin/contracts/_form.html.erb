@@ -58,22 +58,22 @@
 
         <div class="form-group mb-3">
           <%= f.label :contract_conclusion_date, "契約締結日", class: "form-label fw-bold" %>
-          <%= f.date_field :contract_conclusion_date, class: "form-control rounded-3 shadow-sm", id: "contract_conclusion_date" %>
+          <%= f.date_field :contract_conclusion_date, class: "form-control rounded-3 shadow-sm", id: "contract_conclusion_date", placeholder: "例：2024年4月1日" %>
         </div>
 
         <div class="form-group mb-3">
           <%= f.label :contract_start_date, "契約開始日", class: "form-label fw-bold" %>
-          <%= f.date_field :contract_start_date, class: "form-control rounded-3 shadow-sm", id: "contract_start_date" %>
+          <%= f.date_field :contract_start_date, class: "form-control rounded-3 shadow-sm", id: "contract_start_date", placeholder: "例：2024年4月1日" %>
         </div>
 
         <div class="form-group mb-3">
           <%= f.label :expiration_date, "契約満了日", class: "form-label fw-bold" %>
-          <%= f.date_field :expiration_date, class: "form-control rounded-3 shadow-sm", id: "contract_expiration_date" %>
+          <%= f.date_field :expiration_date, class: "form-control rounded-3 shadow-sm", id: "contract_expiration_date", placeholder: "例：2025年3月31日" %>
         </div>
 
         <div class="form-group mb-3">
           <%= f.label :renewal_date, "契約更新日", class: "form-label fw-bold" %>
-          <%= f.date_field :renewal_date, class: "form-control rounded-3 shadow-sm" %>
+          <%= f.date_field :renewal_date, class: "form-control rounded-3 shadow-sm", placeholder: "例：2025年3月31日" %>
         </div>
 
         <div class="form-group mb-3">
@@ -108,8 +108,8 @@
             <div class="mt-3">
               <div class="row">
                 <% @contract.attachments.each do |attachment| %>
-                  <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+                  <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
                       <div class="card-body p-3">
                         <div class="d-flex align-items-center mb-2">
                           <i class="fas fa-paperclip me-2 text-muted"></i>
@@ -199,11 +199,10 @@ function initializeFilePreview() {
       
       Array.from(files).forEach((file, index) => {
         const previewCol = document.createElement('div');
-        previewCol.className = 'col-md-6 col-lg-4 mb-3';
+        previewCol.className = 'col-12 col-sm-6 col-lg-4 mb-3';
         
         const previewCard = document.createElement('div');
         previewCard.className = 'card h-100 border-0 shadow-sm';
-        previewCard.style.minWidth = '300px';
         
         const cardBody = document.createElement('div');
         cardBody.className = 'card-body p-3';
@@ -255,6 +254,24 @@ function initializeFilePreview() {
         }
         
         cardBody.appendChild(previewDiv);
+        
+        // プレビューボタン
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'd-flex gap-2 flex-nowrap justify-content-between mt-2';
+        
+        if (file.type.startsWith('image/')) {
+          const previewButton = document.createElement('button');
+          previewButton.type = 'button';
+          previewButton.className = 'btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap';
+          previewButton.innerHTML = '<i class="fas fa-eye"></i><span>プレビュー</span>';
+          previewButton.onclick = function() {
+            const fileUrl = URL.createObjectURL(file);
+            openImageModal(fileUrl, file.name);
+          };
+          buttonDiv.appendChild(previewButton);
+        }
+        
+        cardBody.appendChild(buttonDiv);
         previewCard.appendChild(cardBody);
         previewCol.appendChild(previewCard);
         previewRow.appendChild(previewCol);
@@ -427,5 +444,24 @@ if (document.readyState === 'loading') {
 // Turbolinks対応
 document.addEventListener('turbo:load', initializeOCR);
 
+// 画像モーダルを開く関数
+function openImageModal(imageUrl, filename) {
+  const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('imageModalLabel');
+  const downloadLink = document.getElementById('downloadLink');
+  
+  modalImage.src = imageUrl;
+  modalImage.alt = filename;
+  modalTitle.textContent = filename;
+  
+  // ダウンロードリンクを正しく設定
+  if (downloadLink) {
+    downloadLink.href = imageUrl;
+    downloadLink.download = filename;
+  }
+  
+  modal.show();
+}
 
 </script> 

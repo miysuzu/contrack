@@ -46,6 +46,10 @@ class ContractsController < ApplicationController
       @contracts = @contracts.order(renewal_date: :desc, created_at: :desc)
     when "updated_asc"
       @contracts = @contracts.order(renewal_date: :asc, created_at: :desc)
+    when "contract_start_date_asc"
+      @contracts = @contracts.order(contract_start_date: :asc, created_at: :desc)
+    when "contract_start_date_desc"
+      @contracts = @contracts.order(contract_start_date: :desc, created_at: :desc)
     when "expiration_asc"
       @contracts = @contracts.order(expiration_date: :asc, created_at: :desc)
     when "expiration_desc"
