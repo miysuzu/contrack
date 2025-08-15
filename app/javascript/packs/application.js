@@ -8,8 +8,11 @@ Turbolinks.start()
 ActiveStorage.start()
 
 // Bootstrap と SCSS 読み込み
-import "bootstrap"
+import * as bootstrap from "bootstrap"
 import "../stylesheets/application"
+
+// Bootstrapをグローバルスコープに公開
+window.bootstrap = bootstrap;
 
 // 通知ドロップダウンの機能
 function toggleNotifications() {

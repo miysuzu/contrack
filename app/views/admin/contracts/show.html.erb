@@ -446,58 +446,112 @@
   initializeSlackMessageGeneration();
 
   function openImageModal(imageUrl, filename) {
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-    const modalImage = document.getElementById('modalImage');
-    const modalTitle = document.getElementById('imageModalLabel');
-    const downloadLink = document.getElementById('downloadLink');
+    // 既存のモーダルがあれば削除
+    const existingModal = document.getElementById('customImageModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
 
-    modalImage.src = imageUrl;
-    modalImage.alt = filename;
-    modalTitle.textContent = filename;
-    downloadLink.href = imageUrl;
-    downloadLink.download = filename;
+      // モーダル要素を作成
+  const modal = document.createElement('div');
+  modal.id = 'customImageModal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
 
-    modal.show();
+  // モーダルコンテンツを作成
+  modal.innerHTML = `
+    <div style="
+      background: white;
+      border-radius: 12px;
+      padding: 0;
+      width: 90%;
+      height: 90%;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+    ">
+      <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        flex-shrink: 0;
+      ">
+        <h5 style="margin: 0; font-size: 18px; font-weight: 600;">${filename}</h5>
+        <button onclick="closeImageModal()" style="
+          background: none;
+          border: none;
+          font-size: 28px;
+          cursor: pointer;
+          color: #999;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">&times;</button>
+      </div>
+      <div style="
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow: auto;
+      ">
+        <img src="${imageUrl}" alt="${filename}" style="
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          border-radius: 8px;
+        ">
+      </div>
+      <div style="
+        padding: 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-shrink: 0;
+      ">
+        <button onclick="closeImageModal()" class="btn btn-secondary">閉じる</button>
+        <a href="${imageUrl}" download="${filename}" class="btn btn-primary">
+          <i class="fas fa-download me-2"></i>ダウンロード
+        </a>
+      </div>
+    </div>
+  `;
+
+    // モーダルを表示
+    document.body.appendChild(modal);
+
+    // ESCキーで閉じる
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      }
+    });
+  }
+
+  function closeImageModal() {
+    const modal = document.getElementById('customImageModal');
+    if (modal) {
+      modal.remove();
+    }
   }
 </script>
 
-<!-- 画像モーダル -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="imageModalLabel"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="modalImage" src="" alt="" class="img-fluid">
-      </div>
-      <div class="modal-footer">
-        <a id="downloadLink" href="" download="" class="btn btn-primary">
-          <i class="fas fa-download me-2"></i>ダウンロード
-        </a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<style>
-/* モーダルを画面中央に配置 */
-.modal-dialog-centered {
-  display: flex;
-  align-items: center;
-  min-height: calc(100% - 1rem);
-}
-
-@media (min-width: 576px) {
-  .modal-dialog-centered {
-    min-height: calc(100% - 3.5rem);
-  }
-}
-
-/* モーダルの背景を暗くして中央に集中 */
-.modal-backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
-}
-</style>
