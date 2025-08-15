@@ -36,9 +36,15 @@ module SlackMessageHelper
       end
     end
     
-    # デフォルトテンプレートを優先
-    default_template = templates.where(is_default: true).first
-    return default_template if default_template
+    # デフォルトテンプレートを優先（複数ある場合は最初のものを使用）
+    default_templates = templates.where(is_default: true)
+    if default_templates.any?
+      # 複数のデフォルトテンプレートがある場合は警告をログに出力
+      if default_templates.count > 1
+        Rails.logger.warn "複数のデフォルトテンプレートが見つかりました: #{default_templates.pluck(:name).join(', ')}"
+      end
+      return default_templates.first
+    end
     
     # デフォルトがない場合は最初のテンプレート
     templates.first
@@ -131,16 +137,22 @@ module SlackMessageHelper
     info << "【作成者】: #{contract.user ? contract.user.name : '管理者作成'}"
     info << "【ステータス】: #{contract.status.name}"
     
+    info << "【作成日】: #{contract.created_at.strftime('%Y年%m月%d日')}"
+    
+    if contract.conclusion_date.present?
+      info << "【締結日】: #{contract.conclusion_date.strftime('%Y年%m月%d日')}"
+    end
+    
+    if contract.contract_start_date.present?
+      info << "【開始日】: #{contract.contract_start_date.strftime('%Y年%m月%d日')}"
+    end
+    
     if contract.expiration_date.present?
       info << "【満了日】: #{contract.expiration_date.strftime('%Y年%m月%d日')}"
     end
     
     if contract.renewal_date.present?
       info << "【更新日】: #{contract.renewal_date.strftime('%Y年%m月%d日')}"
-    end
-    
-    if contract.conclusion_date.present?
-      info << "【締結日】: #{contract.conclusion_date.strftime('%Y年%m月%d日')}"
     end
     
     if contract.group.present?

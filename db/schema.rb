@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_08_06_194158) do
+ActiveRecord::Schema.define(version: 2025_08_14_185604) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -161,11 +161,11 @@ ActiveRecord::Schema.define(version: 2025_08_06_194158) do
     t.text "content"
     t.string "category"
     t.integer "user_id"
-    t.integer "company_id", null: false
+    t.integer "company_id"
     t.boolean "is_default"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "admin_id", null: false
+    t.integer "admin_id"
     t.index ["admin_id"], name: "index_slack_message_templates_on_admin_id"
     t.index ["company_id"], name: "index_slack_message_templates_on_company_id"
     t.index ["user_id"], name: "index_slack_message_templates_on_user_id"

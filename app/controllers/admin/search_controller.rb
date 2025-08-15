@@ -26,7 +26,10 @@ class Admin::SearchController < Admin::ApplicationController
   end
 
   def search_contracts
-    @contracts = Contract.includes(:user, :status).all
+    # 管理者の会社の契約書のみを表示
+    @contracts = current_admin.company ? 
+      Contract.includes(:user, :status).where(company_id: current_admin.company_id) :
+      Contract.none
     
     if @keyword.present?
       keyword = "%#{@keyword}%"

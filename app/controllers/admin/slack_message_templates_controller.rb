@@ -2,7 +2,7 @@ class Admin::SlackMessageTemplatesController < Admin::ApplicationController
   before_action :set_template, only: [:show, :edit, :update, :destroy]
 
   def index
-    @templates = SlackMessageTemplate.where(admin: current_admin).order(:category, :name)
+    @templates = SlackMessageTemplate.where(admin: current_admin).order(:category, :created_at)
     @categories = SlackMessageTemplate.categories
   end
 
@@ -68,8 +68,11 @@ class Admin::SlackMessageTemplatesController < Admin::ApplicationController
     content = content.gsub('{{title}}', contract.title)
     content = content.gsub('{{user_name}}', contract.user ? contract.user.name : '管理者作成')
     content = content.gsub('{{status}}', contract.status.name)
+    content = content.gsub('{{created_at}}', contract.created_at.strftime('%Y年%m月%d日'))
     content = content.gsub('{{expiration_date}}', contract.expiration_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{renewal_date}}', contract.renewal_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_start_date}}', contract.contract_start_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_conclusion_date}}', contract.contract_conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{conclusion_date}}', contract.conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{group_name}}', contract.group&.name || '未設定')
     content = content.gsub('{{tags}}', contract.tag_list.present? ? contract.tag_list.map { |tag| "##{tag}" }.join(' ') : 'なし')

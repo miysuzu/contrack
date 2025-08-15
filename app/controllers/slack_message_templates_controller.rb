@@ -17,6 +17,7 @@ class SlackMessageTemplatesController < ApplicationController
   def create
     @template = SlackMessageTemplate.new(template_params)
     @template.user = current_user
+    @template.company = current_user.company if current_user.company
     
     if @template.save
       redirect_to slack_message_templates_path, notice: 'テンプレートを作成しました。'
@@ -65,6 +66,7 @@ class SlackMessageTemplatesController < ApplicationController
     content = content.gsub('{{title}}', contract.title)
     content = content.gsub('{{user_name}}', contract.user.name)
     content = content.gsub('{{status}}', contract.status.name)
+    content = content.gsub('{{created_at}}', contract.created_at.strftime('%Y年%m月%d日'))
     content = content.gsub('{{expiration_date}}', contract.expiration_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{renewal_date}}', contract.renewal_date&.strftime('%Y年%m月%d日') || '未設定')
     content = content.gsub('{{contract_start_date}}', contract.contract_start_date&.strftime('%Y年%m月%d日') || '未設定')

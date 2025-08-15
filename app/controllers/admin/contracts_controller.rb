@@ -59,6 +59,13 @@ class Admin::ContractsController < Admin::ApplicationController
   end
 
   def show
+    @slack_message = generate_slack_message_for_contract(@contract)
+
+    # Slackテンプレート（カテゴリ別）を取得
+    @slack_templates = {}
+    %w[default created updated expiring renewal].each do |category|
+      @slack_templates[category] = SlackMessageTemplate.where(admin: current_admin).by_category(category).order(:is_default, :name)
+    end
   end
 
   def new
@@ -149,7 +156,15 @@ class Admin::ContractsController < Admin::ApplicationController
   def slack_message
     @contract = Contract.find(params[:id])
     message_type = params[:type] || 'default'
-    slack_message = generate_slack_message_for_contract(@contract, message_type)
+    template_id = params[:template_id]
+
+    if template_id.present?
+      template = SlackMessageTemplate.where(admin: current_admin).find(template_id)
+      slack_message = replace_variables(template.content, @contract)
+    else
+      slack_message = generate_slack_message_for_contract(@contract, message_type)
+    end
+
     render plain: slack_message
   end
 
@@ -201,5 +216,34 @@ class Admin::ContractsController < Admin::ApplicationController
 
   def contract_params
     params.require(:contract).permit(:title, :body, :status_id, :tag_list, :expiration_date, :renewal_date, :user_id, :group_id, :contract_start_date, :contract_conclusion_date, :admin_only, attachments: [])
+  end
+
+  def replace_variables(content, contract)
+    # 変数置換
+    content = content.gsub('{{title}}', contract.title)
+    content = content.gsub('{{user_name}}', contract.user ? contract.user.name : '管理者作成')
+    content = content.gsub('{{status}}', contract.status.name)
+    content = content.gsub('{{created_at}}', contract.created_at.strftime('%Y年%m月%d日'))
+    content = content.gsub('{{expiration_date}}', contract.expiration_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{renewal_date}}', contract.renewal_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_start_date}}', contract.contract_start_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_conclusion_date}}', contract.contract_conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{conclusion_date}}', contract.conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{group_name}}', contract.group&.name || '未設定')
+    content = content.gsub('{{tags}}', contract.tag_list.present? ? contract.tag_list.map { |tag| "##{tag}" }.join(' ') : 'なし')
+    content = content.gsub('{{url}}', admin_contract_url(contract))
+    
+    # 日付計算
+    if contract.expiration_date.present?
+      days_left = (contract.expiration_date - Date.current).to_i
+      content = content.gsub('{{days_until_expiration}}', days_left.to_s)
+    end
+    
+    if contract.renewal_date.present?
+      days_left = (contract.renewal_date - Date.current).to_i
+      content = content.gsub('{{days_until_renewal}}', days_left.to_s)
+    end
+    
+    content
   end
 end

@@ -5,7 +5,7 @@ class Admin::GroupsController < Admin::ApplicationController
   def index
     # 管理者の会社のグループのみを表示（管理者作成のグループも含む）
     if current_admin.company
-      @groups = Group.where(company_id: current_admin.company_id).order(:name)
+      @groups = Group.where(company_id: current_admin.company_id).order(:created_at)
     else
       @groups = Group.none
       flash.now[:alert] = "会社に所属していません。グループ管理機能を使用するには会社に所属する必要があります。"
@@ -100,7 +100,8 @@ class Admin::GroupsController < Admin::ApplicationController
       redirect_to admin_groups_path, alert: "アクセス権限がありません"
       return
     end
-    @group.contracts.each(&:destroy)
+    # グループに属する契約書のgroup_idをnullに設定（削除せずに保持）
+    @group.contracts.update_all(group_id: nil)
     @group.group_users.destroy_all
     @group.destroy
     redirect_to admin_groups_path, notice: 'グループを削除しました。'

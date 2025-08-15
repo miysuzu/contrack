@@ -28,4 +28,27 @@ class SlackMessageTemplate < ApplicationRecord
   def category_name
     self.class.categories[category] || category
   end
+
+  # コールバック
+  before_save :ensure_single_default_per_category
+
+  private
+
+  def ensure_single_default_per_category
+    # このテンプレートがデフォルトに設定される場合
+    if is_default_changed? && is_default?
+      # 同じカテゴリの他のデフォルトテンプレートを非デフォルトにする
+      scope = self.class.where(category: category, is_default: true)
+      
+      # ユーザーまたは管理者のスコープを適用
+      if user.present?
+        scope = scope.where(user: user)
+      elsif admin.present?
+        scope = scope.where(admin: admin)
+      end
+      
+      # 自分以外のテンプレートを非デフォルトにする
+      scope.where.not(id: id).update_all(is_default: false)
+    end
+  end
 end

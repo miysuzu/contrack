@@ -38,6 +38,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                       <h6 class="card-title mb-0 fw-bold text-primary"><%= template.name %></h6>
                       <div class="btn-group btn-group-sm">
+
                         <%= link_to edit_admin_slack_message_template_path(template), 
                             class: "btn btn-outline-warning btn-sm rounded-pill px-3 py-2 shadow-sm d-flex align-items-center gap-2" do %>
                           <i class="fas fa-edit"></i><span>編集</span>
@@ -127,9 +128,9 @@
               <tbody>
                 <tr><td><code>{{title}}</code></td><td>契約書名</td></tr>
                 <tr><td><code>{{status}}</code></td><td>ステータス</td></tr>
+                <tr><td><code>{{created_at}}</code></td><td>契約作成日</td></tr>
+                <tr><td><code>{{conclusion_date}}</code></td><td>契約締結日</td></tr>
                 <tr><td><code>{{contract_start_date}}</code></td><td>契約開始日</td></tr>
-                <tr><td><code>{{contract_conclusion_date}}</code></td><td>契約締結日</td></tr>
-                <tr><td><code>{{conclusion_date}}</code></td><td>締結日（後方互換）</td></tr>
                 <tr><td><code>{{expiration_date}}</code></td><td>契約満了日</td></tr>
                 <tr><td><code>{{renewal_date}}</code></td><td>契約更新日</td></tr>
                 <tr><td><code>{{group_name}}</code></td><td>グループ名</td></tr>

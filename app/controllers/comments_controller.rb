@@ -63,8 +63,8 @@ class CommentsController < ApplicationController
   end
 
   def ensure_comment_owner!
-    # 管理者はすべてのコメントを編集・削除できる
-    unless @comment.commentable == current_user || @contract.user == current_user || current_admin.present?
+    # 自分のコメントのみ編集・削除可能（管理者は除く）
+    unless @comment.commentable == current_user
       redirect_to @contract, alert: "この操作を実行する権限がありません。"
     end
   end

@@ -18,7 +18,7 @@ Rails.application.routes.draw do
       end
     end
     resources :statuses, only: [:index, :create, :destroy, :edit, :update]
-    resources :tags, only: [:index, :show, :destroy]
+    resources :tags, only: [:index, :show, :create, :destroy]
     resources :groups, only: [:index, :show, :new, :create, :edit, :update, :destroy]
     resources :group_join_requests, only: [:index] do
       member do

@@ -16,10 +16,11 @@ class ContractsController < ApplicationController
     @selected_group = current_user.groups.find_by(id: params[:group_id]) if params[:group_id].present?
   
     # 契約書一覧（自分が作成 or 所属グループの契約書）
+    # 管理者専用の契約書は除外する
     @contracts = Contract.where(
       Contract.arel_table[:user_id].eq(current_user.id)
       .or(Contract.arel_table[:group_id].in(group_ids))
-    )
+    ).where("admin_only IS NULL OR admin_only = ?", false)
   
     # 特定グループでさらに絞り込み（所属している場合のみ）
     if @selected_group
@@ -205,7 +206,7 @@ class ContractsController < ApplicationController
     template_id = params[:template_id]
 
     if template_id.present?
-      template = current_user.company.slack_message_templates.find(template_id)
+      template = SlackMessageTemplate.where(user: current_user).find(template_id)
       slack_message = replace_variables(template.content, @contract)
     else
       slack_message = generate_slack_message_for_contract(@contract, message_type)
@@ -220,10 +221,11 @@ class ContractsController < ApplicationController
     group_ids = current_user.groups.pluck(:id)
 
     # show/edit/update/destroy で取得できる契約書も同じく絞り込み
+    # 管理者専用の契約書は除外する
     @contract = Contract.where(
       Contract.arel_table[:user_id].eq(current_user.id)
       .or(Contract.arel_table[:group_id].in(group_ids))
-    ).find(params[:id])
+    ).where("admin_only IS NULL OR admin_only = ?", false).find(params[:id])
   end
 
   def ensure_owner!
@@ -244,7 +246,42 @@ class ContractsController < ApplicationController
   end
 
   def find_templates_for_category(contract, category)
-    return [] unless contract.user&.company
-    contract.user.company.slack_message_templates.by_category(category).order(:is_default, :name)
+    # 契約書の作成者のテンプレートから該当するものを検索
+    if contract.user
+      templates = SlackMessageTemplate.where(user: contract.user).by_category(category).order(:is_default, :name)
+    else
+      # 管理者作成の契約書の場合は、現在のユーザーのテンプレートを使用
+      templates = SlackMessageTemplate.where(user: current_user).by_category(category).order(:is_default, :name)
+    end
+    templates
+  end
+
+  def replace_variables(content, contract)
+    # 変数置換
+    content = content.gsub('{{title}}', contract.title)
+    content = content.gsub('{{user_name}}', contract.user ? contract.user.name : '管理者作成')
+    content = content.gsub('{{status}}', contract.status.name)
+    content = content.gsub('{{created_at}}', contract.created_at.strftime('%Y年%m月%d日'))
+    content = content.gsub('{{expiration_date}}', contract.expiration_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{renewal_date}}', contract.renewal_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_start_date}}', contract.contract_start_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{contract_conclusion_date}}', contract.contract_conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{conclusion_date}}', contract.conclusion_date&.strftime('%Y年%m月%d日') || '未設定')
+    content = content.gsub('{{group_name}}', contract.group&.name || '未設定')
+    content = content.gsub('{{tags}}', contract.tag_list.present? ? contract.tag_list.map { |tag| "##{tag}" }.join(' ') : 'なし')
+    content = content.gsub('{{url}}', contract_url(contract))
+    
+    # 日付計算
+    if contract.expiration_date.present?
+      days_left = (contract.expiration_date - Date.current).to_i
+      content = content.gsub('{{days_until_expiration}}', days_left.to_s)
+    end
+    
+    if contract.renewal_date.present?
+      days_left = (contract.renewal_date - Date.current).to_i
+      content = content.gsub('{{days_until_renewal}}', days_left.to_s)
+    end
+    
+    content
   end
 end

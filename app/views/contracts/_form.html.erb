@@ -120,9 +120,9 @@
                         </div>
                       <% end %>
 
-                      <div class="d-flex gap-2 flex-nowrap justify-content-between mt-2">
+                      <div class="d-grid gap-2 mt-2">
                         <%= link_to rails_blob_path(attachment, disposition: "attachment"),
-                            class: "btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap" do %>
+                            class: "btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap" do %>
                           <i class="fas fa-download"></i><span>ダウンロード</span>
                         <% end %>
                       </div>
@@ -233,12 +233,12 @@ function initializeFilePreview() {
         
         // プレビューボタン
         const buttonDiv = document.createElement('div');
-        buttonDiv.className = 'd-flex gap-2 flex-nowrap justify-content-between mt-2';
+        buttonDiv.className = 'd-grid gap-2 mt-2';
         
         if (file.type.startsWith('image/')) {
           const previewButton = document.createElement('button');
           previewButton.type = 'button';
-          previewButton.className = 'btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 flex-fill text-nowrap';
+          previewButton.className = 'btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap';
           previewButton.innerHTML = '<i class="fas fa-eye"></i><span>プレビュー</span>';
           previewButton.onclick = function() {
             const fileUrl = URL.createObjectURL(file);

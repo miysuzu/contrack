@@ -11,7 +11,7 @@
 <main class="custom-wide-container fade-in" style="width: 100%; max-width: 1000px; margin: 48px auto 0 auto; padding-left: 24px; padding-right: 24px; min-height: calc(100vh - 900px);">
   <div class="card shadow rounded-4 border-0">
     <div class="card-body p-4">
-      <%= form_with model: [@contract, @comment], local: true do |f| %>
+      <%= form_with model: [@contract, @comment], url: admin_contract_comment_path(@contract, @comment), method: :patch, local: true do |f| %>
         <% if @comment.errors.any? %>
           <div class="alert alert-danger">
             <h4><%= @comment.errors.count %>件のエラーが発生しました</h4>

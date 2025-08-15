@@ -267,6 +267,12 @@
         </div>
       </div>
 
+      <!-- テンプレート選択エリア -->
+      <div class="mb-4" id="template-selection" style="display: none;">
+        <label class="form-label fw-semibold">テンプレート選択:</label>
+        <div class="template-options" id="template-options"></div>
+      </div>
+
       <div class="mb-4">
         <label class="form-label fw-semibold">生成されたメッセージ:</label>
         <div class="position-relative">
@@ -306,16 +312,107 @@
 </div>
 
 <script>
-  document.querySelectorAll('input[name="message_type"]').forEach(function(radio) {
-    radio.addEventListener('change', function () {
-      const type = this.value;
-      updateSlackMessage(type);
+  // グローバルスコープでテンプレートデータを定義（重複宣言を防ぐ）
+  if (typeof window.slackTemplates === 'undefined') {
+    window.slackTemplates = <%= raw @slack_templates.to_json %>;
+  }
+
+  // 初期化関数を定義
+  function initializeSlackMessageGeneration() {
+    // 既存のイベントリスナーを削除
+    document.querySelectorAll('input[name="message_type"]').forEach(function(radio) {
+      radio.removeEventListener('change', handleMessageTypeChange);
     });
-  });
+
+    // 新しいイベントリスナーを追加
+    document.querySelectorAll('input[name="message_type"]').forEach(function(radio) {
+      radio.addEventListener('change', handleMessageTypeChange);
+    });
+
+    // 初期化
+    const checkedRadio = document.querySelector('input[name="message_type"]:checked');
+    if (checkedRadio) {
+      const defaultType = checkedRadio.value;
+      showTemplateOptions(defaultType);
+    }
+  }
+
+  function handleMessageTypeChange() {
+    const type = this.value;
+    updateSlackMessage(type);
+    showTemplateOptions(type);
+  }
+
+  function showTemplateOptions(type) {
+    const templateSelection = document.getElementById('template-selection');
+    const templateOptions = document.getElementById('template-options');
+    const templatesForType = window.slackTemplates[type] || [];
+
+    if (templatesForType.length > 1) {
+      let optionsHtml = '';
+      let defaultTemplates = [];
+      
+      // デフォルトテンプレートを全て探す
+      templatesForType.forEach((template) => {
+        if (template.is_default) {
+          defaultTemplates.push(template);
+        }
+      });
+      
+      // デフォルトテンプレートが複数ある場合は最初のものを使用
+      if (defaultTemplates.length > 1) {
+        // 複数のデフォルトテンプレートがある場合は最初のものを使用
+      }
+      
+      // 最初のデフォルトテンプレートを使用（または最初のテンプレート）
+      const defaultTemplateId = defaultTemplates.length > 0 ? defaultTemplates[0].id : null;
+      
+      templatesForType.forEach((template) => {
+        const isDefault = template.is_default ? ' (デフォルト)' : '';
+        const isChecked = (defaultTemplateId && template.id === defaultTemplateId) || 
+                         (!defaultTemplateId && template === templatesForType[0]) ? 'checked' : '';
+        optionsHtml += `
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="template_id" 
+                   id="template_${template.id}" value="${template.id}" ${isChecked}>
+            <label class="form-check-label" for="template_${template.id}">
+              ${template.name}${isDefault}
+            </label>
+          </div>
+        `;
+      });
+
+      templateOptions.innerHTML = optionsHtml;
+      templateSelection.style.display = 'block';
+
+      document.querySelectorAll('input[name="template_id"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+          updateSlackMessageWithTemplate(type, this.value);
+        });
+      });
+
+      // デフォルトテンプレートまたは最初のテンプレートを使用
+      const selectedTemplateId = defaultTemplateId || templatesForType[0].id;
+      updateSlackMessageWithTemplate(type, selectedTemplateId);
+    } else {
+      templateSelection.style.display = 'none';
+      updateSlackMessage(type);
+    }
+  }
 
   function updateSlackMessage(type) {
     const contractId = <%= @contract.id %>;
     fetch(`/admin/contracts/${contractId}/slack_message?type=${type}`)
+      .then(response => response.text())
+      .then(message => {
+        document.getElementById('slack_message').value = message;
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  function updateSlackMessageWithTemplate(type, templateId) {
+    const contractId = <%= @contract.id %>;
+    fetch(`/admin/contracts/${contractId}/slack_message?type=${type}&template_id=${templateId}`)
       .then(response => response.text())
       .then(message => {
         document.getElementById('slack_message').value = message;
@@ -345,6 +442,9 @@
     }, 2000);
   }
 
+  // 初期化
+  initializeSlackMessageGeneration();
+
   function openImageModal(imageUrl, filename) {
     const modal = new bootstrap.Modal(document.getElementById('imageModal'));
     const modalImage = document.getElementById('modalImage');
@@ -360,3 +460,44 @@
     modal.show();
   }
 </script>
+
+<!-- 画像モーダル -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="modalImage" src="" alt="" class="img-fluid">
+      </div>
+      <div class="modal-footer">
+        <a id="downloadLink" href="" download="" class="btn btn-primary">
+          <i class="fas fa-download me-2"></i>ダウンロード
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* モーダルを画面中央に配置 */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+@media (min-width: 576px) {
+  .modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+  }
+}
+
+/* モーダルの背景を暗くして中央に集中 */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+</style>

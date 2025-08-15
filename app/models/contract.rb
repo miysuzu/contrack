@@ -2,7 +2,7 @@ class Contract < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :admin, optional: true
   belongs_to :status
-  belongs_to :group
+  belongs_to :group, optional: true
   belongs_to :company, optional: true
   has_many :comments, dependent: :destroy
   has_many_attached :attachments, dependent: :purge_later
@@ -18,11 +18,11 @@ class Contract < ApplicationRecord
   validate :acceptable_attachments
   
   def conclusion_date
-    contract_start_date
+    contract_conclusion_date
   end
   
   def conclusion_date=(value)
-    self.contract_start_date = value
+    self.contract_conclusion_date = value
   end
   
   # データ型の確実な変換

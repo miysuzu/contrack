@@ -103,10 +103,12 @@
         <div class="col-12 col-md-6">
           <div id="pre-upload-preview"
                style="min-height: 500px; border: 2px dashed #b0c4de; border-radius: 12px; background: #f8fafc; padding: 1.5rem; overflow: auto;">
-            <div class="text-center text-muted py-4">
-              <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
-              <p>ここに画像やPDFのプレビューが表示されます</p>
-            </div>
+            <% unless @contract.attachments.attached? %>
+              <div class="text-center text-muted py-4">
+                <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+                <p>ここに画像やPDFのプレビューが表示されます</p>
+              </div>
+            <% end %>
 
             <% if @contract.attachments.attached? %>
               <div>
@@ -115,7 +117,7 @@
                   <div class="row">
                     <% @contract.attachments.each do |attachment| %>
                       <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+                        <div class="card h-100 border-0 shadow-sm">
                           <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-2">
                               <i class="fas fa-paperclip me-2 text-muted"></i>
@@ -124,18 +126,44 @@
                             </div>
 
                             <% if attachment.content_type.start_with?('image/') %>
-                              <%= image_tag attachment, class: "img-fluid rounded", style: "max-height: 200px; width: 100%; object-fit: cover;" %>
-                            <% elsif attachment.content_type == 'application/pdf' %>
-                              <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
-                                <p class="mb-0 text-muted">PDFファイル</p>
+                              <!-- 画像プレビュー -->
+                              <div class="text-center mb-2">
+                                <img src="<%= rails_blob_url(attachment) %>" 
+                                     class="img-fluid rounded" 
+                                     style="max-height: 200px; max-width: 100%; object-fit: cover; cursor: pointer;"
+                                     onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')"
+                                     alt="<%= attachment.filename %>">
+                              </div>
+                            <% elsif attachment.content_type.start_with?('application/pdf') %>
+                              <!-- PDFプレビュー -->
+                              <div class="text-center mb-2">
+                                <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                  <i class="fas fa-file-pdf text-danger fa-3x"></i>
+                                </div>
                               </div>
                             <% else %>
-                              <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-file fa-3x text-primary mb-2"></i>
-                                <p class="mb-0 text-muted">ファイル</p>
+                              <!-- その他のファイル -->
+                              <div class="text-center mb-2">
+                                <div class="bg-light rounded p-3" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                  <i class="fas fa-file text-secondary fa-3x"></i>
+                                </div>
                               </div>
                             <% end %>
+
+                            <!-- ボタン -->
+                            <div class="d-grid gap-2 mt-2">
+                              <%= link_to rails_blob_path(attachment, disposition: "attachment"), 
+                                  class: "btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap" do %>
+                                <i class="fas fa-download"></i><span>ダウンロード</span>
+                              <% end %>
+
+                              <% if attachment.content_type.start_with?('image/') %>
+                                <button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap"
+                                        onclick="openImageModal('<%= rails_blob_url(attachment) %>', '<%= attachment.filename %>')">
+                                  <i class="fas fa-eye"></i><span>プレビュー</span>
+                                </button>
+                              <% end %>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -155,7 +183,68 @@
   <%= link_to "一覧に戻る", admin_contracts_path, class: "btn btn-secondary px-4" %>
 </div>
 
+<!-- 画像モーダル -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imageModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="modalImage" src="" alt="" class="img-fluid">
+      </div>
+      <div class="modal-footer">
+        <a id="downloadLink" href="" download="" class="btn btn-primary">
+          <i class="fas fa-download me-2"></i>ダウンロード
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* モーダルを画面中央に配置 */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+@media (min-width: 576px) {
+  .modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+  }
+}
+
+/* モーダルの背景を暗くして中央に集中 */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+</style>
+
 <script>
+// 画像モーダルを開く関数
+function openImageModal(imageUrl, filename) {
+  const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('imageModalLabel');
+  const downloadLink = document.getElementById('downloadLink');
+  
+  modalImage.src = imageUrl;
+  modalImage.alt = filename;
+  modalTitle.textContent = filename;
+  
+  // ダウンロードリンクを正しく設定
+  if (downloadLink) {
+    downloadLink.href = imageUrl;
+    downloadLink.download = filename;
+  }
+  
+  modal.show();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const fileInput = document.getElementById('file-input');
   const preview = document.getElementById('pre-upload-preview');
@@ -165,6 +254,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (files.length > 0) {
       preview.innerHTML = '';
       
+      // 新しいプレビューを作成
+      const previewTitle = document.createElement('div');
+      previewTitle.innerHTML = '<strong class="text-dark">選択されたファイル</strong>';
+      preview.appendChild(previewTitle);
+      
+      const previewRow = document.createElement('div');
+      previewRow.className = 'row mt-3';
+      preview.appendChild(previewRow);
+      
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -173,20 +271,20 @@ document.addEventListener('DOMContentLoaded', function() {
           
           if (file.type.startsWith('image/')) {
             filePreview.innerHTML = `
-              <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+              <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body p-3">
                   <div class="d-flex align-items-center mb-2">
                     <i class="fas fa-image me-2 text-primary"></i>
                     <small class="text-muted flex-grow-1">${file.name}</small>
                     <small class="text-muted">(${(file.size / 1024 / 1024).toFixed(2)} MB)</small>
                   </div>
-                  <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
+                  <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover; cursor: pointer;" onclick="openImageModal('${e.target.result}', '${file.name}')">
                 </div>
               </div>
             `;
           } else if (file.type === 'application/pdf') {
             filePreview.innerHTML = `
-              <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+              <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body p-3">
                   <div class="d-flex align-items-center mb-2">
                     <i class="fas fa-file-pdf me-2 text-danger"></i>
@@ -202,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
           } else {
             filePreview.innerHTML = `
-              <div class="card h-100 border-0 shadow-sm" style="min-width: 300px;">
+              <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body p-3">
                   <div class="d-flex align-items-center mb-2">
                     <i class="fas fa-file me-2 text-primary"></i>
@@ -218,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
           }
           
-          preview.appendChild(filePreview);
+          previewRow.appendChild(filePreview);
         };
         reader.readAsDataURL(file);
       });

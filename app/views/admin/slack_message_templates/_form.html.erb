@@ -113,23 +113,25 @@
             </h6>
             <div class="row g-2">
               <div class="col-6">
-                <ul class="list-unstyled small">
-                  <li><code class="bg-light px-1 rounded">{{expiration_date}}</code></li>
-                  <li><code class="bg-light px-1 rounded">{{renewal_date}}</code></li>
-                  <li><code class="bg-light px-1 rounded">{{contract_start_date}}</code></li>
-                <li><code class="bg-light px-1 rounded">{{contract_conclusion_date}}</code></li>
-                <li><code class="bg-light px-1 rounded">{{conclusion_date}}</code></li>
-                  <li><code class="bg-light px-1 rounded">{{days_until_expiration}}</code></li>
-                  <li><code class="bg-light px-1 rounded">{{days_until_renewal}}</code></li>
+                <ul class="list-unstyled small mb-0">
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{created_at}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{conclusion_date}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{contract_start_date}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{expiration_date}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{renewal_date}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{days_until_expiration}}</code></li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;"><code class="bg-light px-1 rounded">{{days_until_renewal}}</code></li>
                 </ul>
               </div>
               <div class="col-6">
-                <ul class="list-unstyled small text-muted">
-                  <li>契約満了日</li>
-                  <li>契約更新日</li>
-                  <li>契約締結日</li>
-                  <li>満了までの日数</li>
-                  <li>更新までの日数</li>
+                <ul class="list-unstyled small text-muted mb-0">
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">契約作成日</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">契約締結日</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">契約開始日</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">契約満了日</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">契約更新日</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">満了までの日数</li>
+                  <li class="d-flex align-items-center" style="min-height: 1.5rem;">更新までの日数</li>
                 </ul>
               </div>
             </div>

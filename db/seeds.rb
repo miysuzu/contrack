@@ -146,8 +146,8 @@ all_statuses = Status.all.to_a
 
   7.times do |i|
     start_date = rand(6..12).months.ago.to_date
-    signed_on = start_date + rand(1..10).days
-    expiration_date = signed_on + rand(30..90).days
+    signed_on = start_date - rand(1..30).days  # 締結日は開始日より前
+    expiration_date = start_date + rand(30..90).days
 
     if i == 0
       renewed_on = Time.zone.today + rand(1..6).days # 一週間以内の契約
@@ -166,6 +166,7 @@ all_statuses = Status.all.to_a
     contract.company_id = user.company_id
     contract.status = all_statuses.sample
     contract.group_id = selected_group_id
+    contract.contract_start_date = start_date
     contract.conclusion_date = signed_on
     contract.expiration_date = expiration_date
     contract.renewal_date = renewed_on
@@ -175,7 +176,7 @@ all_statuses = Status.all.to_a
   end
 end
 
-# デフォルトテンプレートの作成
+# デフォルトテンプレートの作成（ユーザー側）
 default_templates = [
   { name: "契約締結通知", category: "created", content: "新しい契約書が締結されました。関係者はご確認ください。" },
   { name: "更新通知", category: "updated", content: "契約書が更新されました。変更内容をご確認ください。" },
@@ -183,17 +184,20 @@ default_templates = [
   { name: "更新手続き通知", category: "renewal", content: "契約書の更新手続きが必要です。ご対応をお願いします。" }
 ]
 
-default_templates.each do |template_data|
-  template = SlackMessageTemplate.find_or_initialize_by(
-    admin: sampuria_admin,
-    company: sampuria_company,
-    name: template_data[:name],
-    category: template_data[:category]
-  )
-  template.content = template_data[:content]
-  template.is_default = true
-  template.save!
-  puts "   デフォルトテンプレート作成: #{template.name}"
+# 各ユーザーにデフォルトテンプレートを作成
+sampuria_users.each do |user|
+  default_templates.each do |template_data|
+    template = SlackMessageTemplate.find_or_initialize_by(
+      user: user,
+      company: sampuria_company,
+      name: template_data[:name],
+      category: template_data[:category]
+    )
+    template.content = template_data[:content]
+    template.is_default = true
+    template.save!
+    puts "   デフォルトテンプレート作成: #{template.name} (#{user.name})"
+  end
 end
 
 puts " データ作成完了"

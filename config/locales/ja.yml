@@ -7,6 +7,7 @@ ja:
       status: "ステータス"
       tag: "タグ"
       slack_message_template: "Slackメッセージテンプレート"
+      comment: "メモ"
     
     # カラム名の日本語化
     attributes:
@@ -34,6 +35,10 @@ ja:
         content: "メッセージ内容"
         category: "カテゴリ"
         is_default: "デフォルト設定"
+      comment:
+        content: "メモ内容"
+        parent_id: "親メモ"
+        depth: "階層"
     
     # バリデーションエラーメッセージの日本語化
     errors:
