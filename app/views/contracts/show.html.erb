@@ -285,17 +285,27 @@
     </div>
     <div class="mb-4">
       <label class="form-label fw-semibold">メッセージタイプ:</label>
-      <div class="btn-group" role="group">
-        <input type="radio" class="btn-check" name="message_type" id="type_default" value="default" checked>
-        <label class="btn btn-outline-primary rounded-pill" for="type_default">通常</label>
-        <input type="radio" class="btn-check" name="message_type" id="type_created" value="created">
-        <label class="btn btn-outline-success rounded-pill" for="type_created">新規作成</label>
-        <input type="radio" class="btn-check" name="message_type" id="type_updated" value="updated">
-        <label class="btn btn-outline-warning rounded-pill" for="type_updated">内容変更</label>
-        <input type="radio" class="btn-check" name="message_type" id="type_expiring" value="expiring">
-        <label class="btn btn-outline-danger rounded-pill" for="type_expiring">満了通知</label>
-        <input type="radio" class="btn-check" name="message_type" id="type_renewal" value="renewal">
-        <label class="btn btn-outline-info rounded-pill" for="type_renewal">更新通知</label>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="form-check">
+          <input type="radio" class="btn-check" name="message_type" id="type_default" value="default" checked>
+          <label class="btn btn-outline-primary rounded-pill" for="type_default">通常</label>
+        </div>
+        <div class="form-check">
+          <input type="radio" class="btn-check" name="message_type" id="type_created" value="created">
+          <label class="btn btn-outline-success rounded-pill" for="type_created">新規作成</label>
+        </div>
+        <div class="form-check">
+          <input type="radio" class="btn-check" name="message_type" id="type_updated" value="updated">
+          <label class="btn btn-outline-warning rounded-pill" for="type_updated">内容変更</label>
+        </div>
+        <div class="form-check">
+          <input type="radio" class="btn-check" name="message_type" id="type_expiring" value="expiring">
+          <label class="btn btn-outline-danger rounded-pill" for="type_expiring">満了通知</label>
+        </div>
+        <div class="form-check">
+          <input type="radio" class="btn-check" name="message_type" id="type_renewal" value="renewal">
+          <label class="btn btn-outline-info rounded-pill" for="type_renewal">更新通知</label>
+        </div>
       </div>
     </div>
 
@@ -326,7 +336,7 @@
 </div>
 
 <%# --- アクションボタン --- %>
-<div class="d-flex gap-3 justify-content-center my-5">
+<div class="d-flex flex-wrap gap-3 justify-content-center my-5">
   <% if @contract.user == current_user %>
     <%= link_to edit_contract_path(@contract), class: "btn btn-warning px-4 rounded-pill shadow-sm" do %>
       <i class="fas fa-edit me-2"></i>編集
