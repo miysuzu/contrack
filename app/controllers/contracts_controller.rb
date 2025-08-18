@@ -76,7 +76,7 @@ class ContractsController < ApplicationController
 
   def new
     @contract = Contract.new
-    @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
+    @groups = current_user.groups
   end
 
   def create
@@ -129,13 +129,13 @@ class ContractsController < ApplicationController
       end
       redirect_to contract_path(@contract), notice: "契約書を作成しました。"
     else
-      @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
+      @groups = current_user.groups
       render :new
     end
   end  
 
   def edit
-    @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
+    @groups = current_user.groups
   end
 
   def update
@@ -147,7 +147,7 @@ class ContractsController < ApplicationController
       end
       redirect_to contract_path(@contract), notice: "契約書を更新しました。"
     else
-      @groups = current_user.company ? Group.where(company_id: current_user.company_id) : Group.none
+      @groups = current_user.groups
       render :edit
     end
   end
@@ -232,7 +232,8 @@ class ContractsController < ApplicationController
     # 管理者作成（user_idがnil）は編集不可
     if @contract.user.nil?
       redirect_to contracts_path, alert: "管理者作成の契約書は編集できません。"
-    elsif @contract.user != current_user
+    # 自分が作成した契約書、または所属グループの契約書は編集可能
+    elsif @contract.user != current_user && !current_user.groups.include?(@contract.group)
       redirect_to contracts_path, alert: "この操作を実行する権限がありません。"
     end
   end
