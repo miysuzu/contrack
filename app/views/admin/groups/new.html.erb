@@ -13,3 +13,47 @@
   <%= render 'form', group: @group %>
 
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const nameField = document.querySelector('input[name="group[name]"]');
+  const submitButton = form.querySelector('input[type="submit"]');
+  
+  // リアルタイムバリデーション
+  nameField.addEventListener('input', function() {
+    const value = this.value.trim();
+    const isValid = value.length >= 1 && value.length <= 50;
+    
+    if (isValid) {
+      this.classList.remove('is-invalid');
+      this.classList.add('is-valid');
+    } else {
+      this.classList.remove('is-valid');
+      this.classList.add('is-invalid');
+    }
+    
+    // 送信ボタンの有効/無効を切り替え
+    submitButton.disabled = !isValid;
+  });
+  
+  // フォーム送信時のバリデーション
+  form.addEventListener('submit', function(e) {
+    const value = nameField.value.trim();
+    
+    if (value.length === 0) {
+      e.preventDefault();
+      alert('グループ名を入力してください');
+      nameField.focus();
+      return false;
+    }
+    
+    if (value.length > 50) {
+      e.preventDefault();
+      alert('グループ名は50文字以下で入力してください');
+      nameField.focus();
+      return false;
+    }
+  });
+});
+</script>
